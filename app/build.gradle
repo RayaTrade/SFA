@@ -6,8 +6,8 @@ android {
         applicationId "com.raya.sfa"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 23
-        versionName "4.4"
+        versionCode 24
+        versionName "4.5"
     }
     buildTypes {
         release {

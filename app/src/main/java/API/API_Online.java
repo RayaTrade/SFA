@@ -1068,15 +1068,18 @@ public class API_Online extends LoginActivity{
                 object.accumulate("Amount", String.valueOf(Calcualte_Amount(productList)));
                 object.accumulate("PromoID", 0);
                 JSONArray jsArray = new JSONArray();
-                for (int i = 0; i < Trucks.getTruckType().size(); i++) {
-                    if(Trucks.getTruckType().get(i).getCount() > 0)
-                    {
-                        String jsonInString = new Gson().toJson(Trucks.getTruckType().get(i));
-                        JSONObject mJSONObject = new JSONObject(jsonInString);
-                        jsArray.put(mJSONObject);
+
+                if(User.Allow_Delivery_Method) {
+                    for (int i = 0; i < Trucks.getTruckType().size(); i++) {
+                        if (Trucks.getTruckType().get(i).getCount() > 0) {
+                            String jsonInString = new Gson().toJson(Trucks.getTruckType().get(i));
+                            JSONObject mJSONObject = new JSONObject(jsonInString);
+                            jsArray.put(mJSONObject);
+                        }
                     }
                 }
-                object.accumulate("Trucks",jsArray );
+                object.accumulate("Trucks", jsArray);
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
