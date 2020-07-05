@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.ahmed_hasanein.sfa.SyncBackActivity">
+
+
+    <!--<ProgressBar-->
+        <!--android:id="@+id/progress_bar_sync_ids"-->
+        <!--style="?android:progressBarStyle"-->
+        <!--android:indeterminateTint="@color/colorPrimary"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="center" />-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+
+        <TextView
+            android:textStyle="bold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:padding="8dp"
+            android:textColor="#4d4d4d"
+            android:text="Sync Back !"
+            android:textSize="25dp"
+            android:gravity="center" />
+
+
+        <TextView
+            android:id="@+id/TxtSyncHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:text="Sync Online..."
+            android:textSize="16dp"
+            android:gravity="center" />
+
+        <ImageView
+            android:id="@+id/IMG_Sync_True"
+            android:layout_width="70dp"
+            android:visibility="gone"
+            android:layout_height="70dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="42dp"
+            android:layout_marginBottom="60dp"
+            android:src="@drawable/correct"/>
+
+        <ProgressBar
+            android:id="@+id/progress_bar_sync_back_logo"
+            style="?android:progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_marginTop="42dp"
+            android:layout_marginBottom="60dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/colorPrimary" />
+
+        <ImageView
+            android:id="@+id/IMG_Sync_Warning"
+            android:layout_width="70dp"
+            android:visibility="gone"
+            android:layout_height="70dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="42dp"
+            android:layout_marginBottom="60dp"
+            android:src="@drawable/warning"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="5dp"
+            android:layout_weight="2"
+            android:orientation="vertical"
+            android:visibility="invisible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#0079D6"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:weightSum="6">
+
+                <TextView
+                    android:layout_width="15px"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="Type"
+                    android:textColor="@color/colorWhite" />
+
+                <TextView
+                    android:layout_width="15px"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="OfflineID"
+                    android:textColor="@color/colorWhite" />
+
+                <TextView
+                    android:layout_width="18px"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="OnlineID"
+                    android:textColor="@color/colorWhite" />
+
+                <TextView
+                    android:layout_width="18px"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="Cus.Num"
+                    android:textColor="@color/colorWhite" />
+
+
+                <TextView
+                    android:layout_width="15px"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="Items"
+                    android:textColor="@color/colorWhite" />
+
+                <TextView
+                    android:layout_width="15px"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="Action"
+                    android:textColor="@color/colorWhite" />
+            </LinearLayout>
+
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ProgressBar
+                    android:id="@+id/progress_bar_sync_back"
+                    style="?android:progressBarStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:indeterminateTint="@color/colorPrimary" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/recyclerSyncBack"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+            </FrameLayout>
+        </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/btnDoneSyncBack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:padding="16dp"
+            android:layout_gravity="bottom"
+            android:textColor="@color/colorWhite"
+            android:backgroundTint="@android:color/holo_blue_dark"
+            android:text="DONE"
+            android:textSize="15dp"
+            android:gravity="center" />
+    </LinearLayout>
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/txtVNumberSyncBack"
+            android:layout_gravity="center_horizontal|top"
+            android:text="Version Number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </FrameLayout>
+
+</FrameLayout>

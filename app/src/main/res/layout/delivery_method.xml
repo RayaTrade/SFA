@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/delivery_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:maxHeight="100dp"
+        android:padding="5dp"
+        android:scrollbars="vertical"
+        android:text="TextView"
+        android:textColor="#A93226" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:padding="5dp"
+        android:text="Choose Truck:"
+        android:textColor="@color/text_color_for_movie_overview"
+        android:textStyle="bold|italic" />
+
+    <ListView
+        android:id="@+id/delivery_list"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_margin="5dp"
+        android:dividerHeight="3dp">
+
+    </ListView>
+
+    <Button
+        android:id="@+id/delivery_confirm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:background="#2ECC71"
+        android:text="Confirm" />
+</LinearLayout>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:background="@color/colorWhite"
+    android:orientation="vertical"
+    android:layout_gravity="center_vertical|center_horizontal"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:src="@drawable/warning"
+            android:layout_gravity="left|center"
+            android:layout_width="30dp"
+            android:layout_height="30dp" />
+
+        <TextView
+        android:layout_margin="10dp"
+        android:textColor="@android:color/black"
+        android:layout_gravity="center"
+        android:textStyle="bold"
+        android:text="Please Update Your Application"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="5dp"
+        android:background="@color/colorPrimary" />
+
+
+    <LinearLayout
+        android:layout_margin="10dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <TextView
+            android:id="@+id/TxtcurrentVersion"
+            android:layout_gravity="center"
+            android:text="Your Version : "
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_marginTop="10dp"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            android:id="@+id/TxtUpdateVersion"
+            android:layout_gravity="center"
+            android:text="Update Version : "
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Button
+            android:layout_weight="1"
+            style="?android:attr/borderlessButtonStyle"
+            android:id="@+id/dialogbtnVersionOk"
+            android:textColor="#009A31"
+            android:text="Update"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+
+
+
+</LinearLayout>

@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">SFA</string>
+    <string-array name="category_spinner">
+        <item>Category List Loading...</item>
+    </string-array>
+    <string-array name="brand_spinner">
+        <item>Brand List Loading...</item>
+    </string-array>
+    <string-array name="model_spinner">
+        <item>Model List Loading...</item>
+    </string-array>
+    <string-array name="Tender_spinner">
+        <item>Tender Type List Loading...</item>
+    </string-array>
+    <string-array name="Delivery_spinner">
+        <item>Delivery Method List Loading...</item>
+    </string-array>
+    <string-array name="Reason_spinner">
+        <item>Reason List Loading...</item>
+    </string-array>
+    <string name="permission_rationale">Please grant location permission to start the service</string>
+    <string name="permission_denied_explanation">You have not granted location permission. So the service cannot be started.</string>
+    <string name="settings">settings</string>
+    <string name="comment">Add comment</string>
+    <string name="title_alert_no_intenet">No internet</string>
+    <string name="title_alert_no_gps">No GPS</string>
+    <string name="title_alert_offline_mode">Offline Mode</string>
+    <string name="msg_alert_no_internet">Please make sure that you have active internet connection.</string>
+    <string name="msg_alert_no_gps">Please make sure that you have turn on GPS with high accuracy mode.</string>
+    <string name="msg_alert_offline_mode">You are now in offline mode,Any transactions will save on device you should sync back when login online</string>
+    <string name="no_google_playservice_available">No Google Playservice found. Please install it.</string>
+    <string name="msg_location_service_not_started">Location Tracking Not Started</string>
+    <string name="msg_location_service_started">Location Tracking Started</string>
+    <string name="btn_label_refresh">Refresh</string>
+    <string name="btn_label_ok">Ok</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+</resources>

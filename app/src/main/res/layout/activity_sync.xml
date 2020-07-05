@@ -1,0 +1,574 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:background="@color/colorWhite"
+    android:layout_margin="15dp"
+    tools:context="com.example.ahmed_hasanein.sfa.SyncActivity">
+
+    <LinearLayout
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp" >
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/TxtLoginSync"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Login Sync"
+            android:textColor="@android:color/black"
+            android:textSize="18sp" />
+
+       <ProgressBar
+           android:visibility="gone"
+           android:id="@+id/progress_bar_login_sync"
+           android:layout_gravity="right"
+           android:layout_width="30dp"
+           android:layout_height="30dp" />
+
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/IMG_login_right"
+            android:src="@drawable/right"
+            android:layout_gravity="right"
+            android:layout_width="30dp"
+            android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_login_error"
+                android:src="@drawable/warning"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+        </FrameLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/darker_gray" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/TxtPermissionsSync"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Permissions Sync"
+                android:textColor="@android:color/black"
+                android:textSize="18sp" />
+
+            <ProgressBar
+                android:visibility="gone"
+                android:id="@+id/progress_bar_Permissions_sync"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_Permissions_right"
+                android:src="@drawable/right"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_Permissions_error"
+                android:src="@drawable/warning"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+        </FrameLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/darker_gray" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/TxtCustomerSync"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Customer Sync"
+                android:textColor="@android:color/black"
+                android:textSize="18sp" />
+
+            <ProgressBar
+                android:visibility="gone"
+                android:id="@+id/progress_bar_customer_sync"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_customer_right"
+                android:src="@drawable/right"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_customer_error"
+                android:src="@drawable/warning"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+        </FrameLayout>
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/darker_gray" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/TxtPreOrderSync"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Preorder Sync"
+                android:textColor="@android:color/black"
+                android:textSize="18sp" />
+
+            <ProgressBar
+                android:visibility="gone"
+                android:id="@+id/progress_bar_preOrder_sync"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_preOrder_right"
+                android:src="@drawable/right"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_preOrder_error"
+                android:src="@drawable/warning"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+        </FrameLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/darker_gray" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/TxtOrderSync"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Order Sync"
+                android:layout_gravity="left"
+                android:textColor="@android:color/black"
+                android:textSize="18sp" />
+
+            <ProgressBar
+                android:visibility="gone"
+                android:id="@+id/progress_bar_Order_sync"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_Order_right"
+                android:src="@drawable/right"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_Order_error"
+                android:src="@drawable/warning"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+        </FrameLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/darker_gray" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/TxtCategorySync"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Category Sync"
+                android:layout_gravity="left"
+                android:textColor="@android:color/black"
+                android:textSize="18sp" />
+
+            <ProgressBar
+                android:visibility="gone"
+                android:id="@+id/progress_bar_Category_sync"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_Category_right"
+                android:src="@drawable/right"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_Category_error"
+                android:src="@drawable/warning"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+        </FrameLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/darker_gray" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/TxtBrandSync"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Brand Sync"
+                android:layout_gravity="left"
+                android:textColor="@android:color/black"
+                android:textSize="18sp" />
+
+            <ProgressBar
+                android:visibility="gone"
+                android:id="@+id/progress_bar_Brand_sync"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_Brand_right"
+                android:src="@drawable/right"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_Brand_error"
+                android:src="@drawable/warning"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+        </FrameLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/darker_gray" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/TxtModelSync"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Model Sync"
+                android:layout_gravity="left"
+                android:textColor="@android:color/black"
+                android:textSize="18sp" />
+
+            <ProgressBar
+                android:visibility="gone"
+                android:id="@+id/progress_bar_Model_sync"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_Model_right"
+                android:src="@drawable/right"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_Model_error"
+                android:src="@drawable/warning"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+        </FrameLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/darker_gray" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/TxtDeliveryMethodSync"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Delivery Method Sync"
+                android:layout_gravity="left"
+                android:textColor="@android:color/black"
+                android:textSize="18sp" />
+
+            <ProgressBar
+                android:visibility="gone"
+                android:id="@+id/progress_bar_DeliveryMethod_sync"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_DeliveryMethod_right"
+                android:src="@drawable/right"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_DeliveryMethod_error"
+                android:src="@drawable/warning"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+        </FrameLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/darker_gray" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/TxtTenderTypeSync"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tender Type Sync"
+                android:layout_gravity="left"
+                android:textColor="@android:color/black"
+                android:textSize="18sp" />
+
+            <ProgressBar
+                android:visibility="gone"
+                android:id="@+id/progress_bar_TenderType_sync"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_TenderType_right"
+                android:src="@drawable/right"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_TenderType_error"
+                android:src="@drawable/warning"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+        </FrameLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/darker_gray" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/TxtEndUserPriceSync"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="End User Price Sync"
+                android:layout_gravity="left"
+                android:textColor="@android:color/black"
+                android:textSize="18sp" />
+
+            <ProgressBar
+                android:visibility="gone"
+                android:id="@+id/progress_bar_EndUserPrice_sync"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_EndUserPrice_right"
+                android:src="@drawable/right"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_EndUserPrice_error"
+                android:src="@drawable/warning"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+        </FrameLayout>
+
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/darker_gray" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/TxtGetStockSerialsSync"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Stock Serials Sync"
+                android:layout_gravity="left"
+                android:textColor="@android:color/black"
+                android:textSize="18sp" />
+
+            <ProgressBar
+                android:visibility="gone"
+                android:id="@+id/progress_bar_GetStockSerials_sync"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_GetStockSerials_right"
+                android:src="@drawable/right"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/IMG_GetStockSerials_error"
+                android:src="@drawable/warning"
+                android:layout_gravity="right"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+        </FrameLayout>
+
+    </LinearLayout>
+
+</ScrollView>

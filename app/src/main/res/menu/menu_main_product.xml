@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".CustomerActivity">
+
+    <item
+        android:id="@+id/action_cart"
+        android:orderInCategory="2"
+        android:title="Cart"
+        android:icon="@drawable/cart_count"
+        app:showAsAction="ifRoom"></item>
+
+
+    <item
+        android:id="@+id/action_search"
+        android:iconTint="@color/colorWhite"
+        android:icon="@android:drawable/ic_menu_search"
+        android:title="Search..."
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionViewClass="android.support.v7.widget.SearchView"/>
+
+</menu>

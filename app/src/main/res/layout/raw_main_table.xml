@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:padding="5dp"
+    android:background="@drawable/table_border"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/txttablesku"
+        android:layout_width="15px"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:textStyle="bold"
+        android:text="SKU" />
+    <TextView
+        android:id="@+id/txttableQty"
+        android:layout_width="10px"
+        android:textColor="@color/red"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.5"
+        android:text="Qty" />
+    <TextView
+        android:id="@+id/txttableprice"
+        android:layout_width="20px"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Price" />
+    <TextView
+        android:textColor="@color/colorPrimary"
+        android:id="@+id/txttabletotal"
+        android:layout_width="20px"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="total" />
+</TableRow>
+

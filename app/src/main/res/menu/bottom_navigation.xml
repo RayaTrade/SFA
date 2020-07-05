@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--<item-->
+        <!--android:id="@+id/navigation_all_customer"-->
+        <!--android:enabled="true"-->
+        <!--android:title="All Customers" />-->
+
+    <item
+        android:id="@+id/navigation_today"
+        android:icon="@drawable/today"
+        android:enabled="true"
+        android:title="Today" />
+
+    <item
+        android:id="@+id/navigation_tomorrow"
+        android:icon="@drawable/tomorrow"
+        android:enabled="true"
+        android:title="Tomorrow" />
+
+    <item
+        android:id="@+id/navigation_week"
+        android:icon="@drawable/week"
+        android:enabled="true"
+        android:title="Week" />
+
+    <item
+        android:id="@+id/navigation_month"
+        android:icon="@drawable/month"
+        android:enabled="true"
+        android:title="Month" />
+</menu>
