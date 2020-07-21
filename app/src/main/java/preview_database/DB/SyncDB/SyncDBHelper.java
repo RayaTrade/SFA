@@ -8,10 +8,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -32,7 +32,6 @@ import Model.*;
 import Model.Items;
 import Model.TransactionTender;
 import Model.Serial;
-import Model.StockSerial;
 import Model.SyncBack;
 import Model.Reason;
 
@@ -85,7 +84,8 @@ public class SyncDBHelper extends SQLiteOpenHelper {
 
         db.execSQL(
                 "create table PreOrderOffline " +
-                        "(ITEM_CODE text primary key, " +
+                        "(Id INTEGER PRIMARY KEY AUTOINCREMENT,"+
+                        "ITEM_CODE text, " +
                         "CAT text," +
                         "BRAND text," +
                         "MODEL text," +
@@ -101,13 +101,15 @@ public class SyncDBHelper extends SQLiteOpenHelper {
                         "SEGMENT1 text,"+
                         "MAIN_CAT text,"+
                         "INVENTORY_ITEM_ID text,"+
-                        "CREATION_DATE text"+
+                        "CREATION_DATE text,"+
+                        "Subinventory text"+
                         ")"
         );
 
         db.execSQL(
                 "create table OrderOffline " +
-                        "(ITEM_CODE text primary key, " +
+                        "(Id INTEGER PRIMARY KEY AUTOINCREMENT,"+
+                        "ITEM_CODE text, " +
                         "CAT text," +
                         "BRAND text," +
                         "MODEL text," +
@@ -123,7 +125,8 @@ public class SyncDBHelper extends SQLiteOpenHelper {
                         "SEGMENT1 text,"+
                         "MAIN_CAT text,"+
                         "INVENTORY_ITEM_ID text,"+
-                        "CREATION_DATE text"+
+                        "CREATION_DATE text,"+
+                        "Subinventory text"+
                         ")"
         );
 
@@ -187,6 +190,11 @@ public class SyncDBHelper extends SQLiteOpenHelper {
                         "(Id INTEGER PRIMARY KEY," +
                         "T_Type text)"
         );
+        db.execSQL(
+                "create table User_X_Subinventory " +
+                        "(Id INTEGER PRIMARY KEY," +
+                        "SubinventoryID text,Subinventory text)"
+        );
 
         db.execSQL(
                 "create table Promotions " +
@@ -235,7 +243,7 @@ public class SyncDBHelper extends SQLiteOpenHelper {
                         "Submitter text," +
                         "QtyinStock text," +
                         "Total text," +
-                        "Total_History text)"
+                        "Total_History text,Subinventory text)"
         );
         db.execSQL(
                 "create table TransactionSerialsOffline " +
@@ -316,6 +324,7 @@ public class SyncDBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS ItemDimensions");
         db.execSQL("DROP TABLE IF EXISTS TruckType");
         db.execSQL("DROP TABLE IF EXISTS Transaction_Truck");
+        db.execSQL("DROP TABLE IF EXISTS User_X_Subinventory");
 
         onCreate(db);
     }
@@ -386,6 +395,9 @@ public class SyncDBHelper extends SQLiteOpenHelper {
             e.printStackTrace();
         }
         db.close();
+
+
+
         return truckTypes;
     }
 
@@ -418,6 +430,14 @@ public class SyncDBHelper extends SQLiteOpenHelper {
             e.printStackTrace();
         }
         db.close();
+
+        Collections.sort(truckTypes, new Comparator<TruckType>() {
+            @Override
+            public int compare(TruckType o1, TruckType o2) {
+                return Double.valueOf(o1.getSize()).compareTo(Double.valueOf(o2.getSize()));
+            }
+        });
+
         return truckTypes;
     }
     public List<ProductDimension> getItemDimensionsOffline(List<Product> productList) {
@@ -928,9 +948,9 @@ public void deletepromotion() {
         db.close();
     }
 
-    public void deleteFromTransactionItemsOfflineByItemCode(String ItemCode) {
+    public void deleteFromTransactionItemsOfflineByItemCode(String ItemCode,String Subinventory) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("delete from Transaction_Items where ITEM_CODE='" + ItemCode + "'");
+        db.execSQL("delete from Transaction_Items where ITEM_CODE='" + ItemCode + "' and Subinventory ='"+Subinventory+"'");
         db.close();
     }
 
@@ -942,7 +962,7 @@ public void deletepromotion() {
     }
 
 
-    public long InsertTransactionItemsOffline(String HeaderID, String ItemCode, String Qty, String UnitPrice, String Discount, String Submitter, String QtyinStock) {
+    public long InsertTransactionItemsOffline(String HeaderID, String ItemCode, String Qty, String UnitPrice, String Discount, String Submitter, String QtyinStock,String Subinventory) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("HeaderID", HeaderID);
@@ -952,6 +972,7 @@ public void deletepromotion() {
         contentValues.put("Discount", Discount);
         contentValues.put("Submitter", Submitter);
         contentValues.put("QtyinStock", QtyinStock);
+        contentValues.put("Subinventory", Subinventory);
         contentValues.put("Total", String.valueOf( Double.parseDouble(UnitPrice) * Integer.parseInt(Qty) ));
 
         String currentDate = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new Date());
@@ -1019,6 +1040,7 @@ public void deletepromotion() {
                     item.setDiscount(cursor.getString(cursor.getColumnIndex("Discount")));
                     item.setSubmitter(cursor.getString(cursor.getColumnIndex("Submitter")));
                     item.setQtyinStock(cursor.getString(cursor.getColumnIndex("QtyinStock")));
+                    item.setSubinventory(cursor.getString(cursor.getColumnIndex("Subinventory")));
 
                     items.add(item);
                 } while (cursor.moveToNext());
@@ -1962,17 +1984,18 @@ public void deletepromotion() {
         db.close();
     }
 
-    public String getUserIDfromLoginOffline() {
+    public User getUserfromLoginOffline() {
         SQLiteDatabase db = this.getReadableDatabase();
-        String USERID = "";
+        User USER = new User();
         Cursor res = db.rawQuery("select * from LoginOffline", null);
         if (res.moveToFirst()) {
             do {
-                USERID = res.getString(res.getColumnIndex("UserID"));
+                 USER.setAllow_Delivery_Method(Boolean.valueOf(res.getString(res.getColumnIndex("Allow_Delivery_Method"))));
+                 USER.setUserID((res.getString(res.getColumnIndex("UserID"))));
             } while (res.moveToNext());
         }
         res.close();
-        return USERID;
+        return USER;
     }
 
     public String getServerConfigIDfromLoginOffline() {
@@ -1996,6 +2019,38 @@ public void deletepromotion() {
         db.insert("PermssionsOffline", null, contentValues);
 
         return true;
+    }
+
+    public boolean InsertUser_X_Subinventory(Subinventory sub) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("SubinventoryID", sub.getSubinventoryID());
+        contentValues.put("Subinventory", sub.getSubinventory());
+        db.insert("User_X_Subinventory", null, contentValues);
+
+        return true;
+    }
+
+    public List<Subinventory> getUser_X_Subinventory() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        List<Subinventory> subinventoryList = new ArrayList<>();
+        Cursor res = db.rawQuery("select * from User_X_Subinventory", null);
+        if (res.moveToFirst()) {
+            do {
+                Subinventory subinventory = new Subinventory();
+                subinventory.setSubinventory(res.getString(res.getColumnIndex("Subinventory")));
+                subinventory.setSubinventoryID(res.getString(res.getColumnIndex("SubinventoryID")));
+                subinventoryList.add(subinventory);
+            } while (res.moveToNext());
+        }
+        res.close();
+        return subinventoryList;
+    }
+
+    public void deleteAllUser_X_Subinventory() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("delete from User_X_Subinventory");
+        db.close();
     }
 
     public boolean checkifPermssionOfflineisEmpty() {
@@ -2193,20 +2248,24 @@ public void deletepromotion() {
     public String GetUnitPriceForEndUser(final String SKU, final String CustomerNumber) {
         SQLiteDatabase db = this.getWritableDatabase();
         String result = "";
-        String query = "select * from EndUserPriceOffline where ItemCode = '" + SKU + "' and CustomerNumber='" + CustomerNumber + "'";
+       // String query = "select * from EndUserPriceOffline where ItemCode = '" + SKU + "' and CustomerNumber='" + CustomerNumber + "'";
+        String query = "SELECT * FROM Ora_Customers ora_c join Ora_Pricelist ora_p on ora_c.price_list = ora_p.PR_NAME where ora_p.item_code = '"+SKU+"' and ora_c.Customer_Number = '"+CustomerNumber+"'";
         Cursor cursor = db.rawQuery(query, null);
         while (cursor.moveToNext()) {
-            result = cursor.getString(cursor.getColumnIndex("Price"));
+            result = cursor.getString(cursor.getColumnIndex("END_USER_PR"));
         }
         cursor.close();
         return result;
     }
 
-    public List<Product> getAllPreOrderOffline(final String CustomerNumber) {
+    public List<Product>
+
+
+    getAllPreOrderOffline(final String CustomerNumber,String Subinventory) {
         List<Product> preorders = new ArrayList<>();
 
         // Select All Query
-        String selectQuery = "SELECT  * FROM PreOrderOffline";
+        String selectQuery = "SELECT  * FROM PreOrderOffline where Subinventory = '"+Subinventory+"'";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -2231,6 +2290,7 @@ public void deletepromotion() {
                     preorder.setMAIN_CAT(cursor.getString(cursor.getColumnIndex("MAIN_CAT")));
                     preorder.setINVENTORY_ITEM_ID(cursor.getString(cursor.getColumnIndex("INVENTORY_ITEM_ID")));
                     preorder.setCREATION_DATE(cursor.getString(cursor.getColumnIndex("CREATION_DATE")));
+                    preorder.setSubinventory(cursor.getString(cursor.getColumnIndex("Subinventory")));
 
                     String UnitPrice = GetUnitPriceForEndUser(preorder.getSKU(), CustomerNumber);
                     if (UnitPrice != "") {

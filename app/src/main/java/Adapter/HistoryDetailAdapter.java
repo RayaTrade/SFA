@@ -80,7 +80,7 @@ public class HistoryDetailAdapter extends RecyclerView.Adapter<HistoryDetailAdap
             public void onClick(View v) {
                 try {
                     db_sync = new SyncDBHelper(context);
-                    db_sync.deleteFromTransactionItemsOfflineByItemCode(preOrderHistoryDetail.ItemCode);
+                    db_sync.deleteFromTransactionItemsOfflineByItemCode(preOrderHistoryDetail.ItemCode,preOrderHistoryDetail.Subinventory);
                     preOrderHistoryDetailList.remove(i);
                     notifyItemRemoved(i);
                     notifyItemRangeChanged(i,preOrderHistoryDetailList.size());

@@ -96,7 +96,7 @@
             android:layout_marginRight="5dp"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:text="Sync Now"
+            android:text="Work offline"
             android:textColor="@color/colorRed" />
 
         <TextView
@@ -114,7 +114,7 @@
             android:layout_marginRight="5dp"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:text="Sync Later"
+            android:text="Work online"
             android:textColor="@color/colorRed" />
     </LinearLayout>
 </RelativeLayout>

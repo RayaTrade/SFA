@@ -28,6 +28,7 @@ public class OrderDBHelper extends SQLiteOpenHelper {
     public static final String COLUMN_ORDER_product_Total = "Total";
     public static final String COLUMN_ORDER_product_Collected_Serial = "C_Serial";
     public static final String COLUMN_ORDER_PRODUCT_product_VisitDate = "Visit_Date";
+    public static final String COLUMN_ORDER_PRODUCT_product_Subinventory = "Subinventory";
 
     public OrderDBHelper(Context context) {
         super(context, DATABASE_NAME , null, 4);
@@ -40,7 +41,7 @@ public class OrderDBHelper extends SQLiteOpenHelper {
                 "create table Orders " +
                         "(SKU text primary key, Category text NOT NULL,image_path text NOT NULL,Brand text NOT NULL" +
                         ",Model text NOT NULL,Description text NOT NULL,Quantity text NOT NULL,Customer_Number text NOT NULL" +
-                        ",OnHand text NOT NULL,UnitPrice text NOT NULL,Total text NOT NULL,Visit_Date text NOT NULL,C_Serial text NOT NULL DEFAULT '0')"
+                        ",OnHand text NOT NULL,UnitPrice text NOT NULL,Total text NOT NULL,Visit_Date text NOT NULL,Subinventory text NOT NULL,C_Serial text NOT NULL DEFAULT '0')"
         );
     }
 
@@ -50,7 +51,7 @@ public class OrderDBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
     public boolean insertItemOrder (String SKU, String Category, String image_path, String Brand, String Model
-            , String Description, String Quantity, String Customer_Number, String OnHand, Float UnitPrice, String Total,String Visit_Date) {
+            , String Description, String Quantity, String Customer_Number, String OnHand, Float UnitPrice, String Total,String Visit_Date,String Subinventory) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("SKU", SKU);
@@ -64,6 +65,7 @@ public class OrderDBHelper extends SQLiteOpenHelper {
         contentValues.put("OnHand", OnHand);
         contentValues.put("UnitPrice", UnitPrice);
         contentValues.put("Visit_Date", Visit_Date);
+        contentValues.put("Subinventory", Subinventory);
         contentValues.put("Total", Total);
 
         db.insert("Orders", null, contentValues);
@@ -172,6 +174,7 @@ public class OrderDBHelper extends SQLiteOpenHelper {
                     order.setUnitPrice(Float.valueOf(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_product_UnitPrice))));
                     order.setTotal(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_product_Total)));
                     order.setVisit_Date(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_PRODUCT_product_VisitDate)));
+                    order.setSubinventory(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_PRODUCT_product_Subinventory)));
                     int i = Integer.valueOf(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_product_Collected_Serial)));
                     order.setCollectedSerials(Integer.valueOf(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_product_Collected_Serial))));
                     orders.add(order);

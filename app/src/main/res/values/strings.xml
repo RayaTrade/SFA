@@ -6,6 +6,9 @@
     <string-array name="brand_spinner">
         <item>Brand List Loading...</item>
     </string-array>
+    <string-array name="Subinventory_spinner">
+        <item>Subinventory List Loading...</item>
+    </string-array>
     <string-array name="model_spinner">
         <item>Model List Loading...</item>
     </string-array>

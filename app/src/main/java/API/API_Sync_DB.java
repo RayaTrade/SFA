@@ -29,6 +29,7 @@ import Model.Parsing_Json.SFA_GetPromotions;
 import Model.Parsing_Json.SFA_GetPromotionsXQuery;
 import Model.Parsing_Json.SFA_GetPromotionsXResult;
 import Model.Parsing_Json.SFA_GetTruckType;
+import Model.Parsing_Json.SFA_User_X_Subinventory;
 import Model.Promotions;
 import Model.Serial;
 import Utility.Http;
@@ -37,6 +38,7 @@ import preview_database.DB.SerialDB.SerialDBHelper;
 import preview_database.DB.SyncDB.SyncDBHelper;
 import Model.TruckType;
 import Model.ProductDimension;
+import Model.Subinventory;
 
 
 public class API_Sync_DB {
@@ -308,26 +310,17 @@ public class API_Sync_DB {
 
     public boolean PreOrderOffline(final Activity activity,final Context context,String ServerConfigID,String customerNumber,String Category,String Brand,String Model,String UserName){
         db_sync = new SyncDBHelper(context);
-        String url_preOrder = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_Items_All/"+ServerConfigID+"/"+customerNumber+"/"+Category+"/"+Brand+"/"+Model+"/"+UserName+"/"+"1";
+        String url_preOrder = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_Items_All_Test/"+ServerConfigID+"/"+customerNumber+"/"+Category+"/"+Brand+"/"+Model+"/"+UserName+"/"+"1/0";
 
         StringRequest preorderRequest = new StringRequest(Request.Method.GET, url_preOrder, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
                     JSONObject object = new JSONObject(response);
-                    JSONArray array = object.getJSONArray("SFA_Items_AllResult");
+                    JSONArray array = object.getJSONArray("SFA_Items_All_TestResult");
 
                     for(int i=0;i<array.length();i++){
                         JSONObject current = array.getJSONObject(i);
-                       /* item_code_preOrder = current.getString("ITEM_CODE");
-                        String category = current.getString("CAT");
-                        String brand = current.getString("BRAND");
-                        String model = current.getString("MODEL");
-                        String description = current.getString("DESCRIPTION");
-                        String image = current.getString("BrandImage");
-                        String ONHAND = current.getString("ONHAND");
-                        String UnitPrice = current.getString("UnitPrice");
-                        String Color = current.getString("COLOR");*/
                         ContentValues contentValues = new ContentValues();
                         contentValues.put("ITEM_CODE", current.getString("ITEM_CODE"));
                         contentValues.put("CAT", current.getString("CAT"));
@@ -346,6 +339,7 @@ public class API_Sync_DB {
                         contentValues.put("MAIN_CAT", current.getString("MAIN_CAT"));
                         contentValues.put("INVENTORY_ITEM_ID", current.getString("INVENTORY_ITEM_ID"));
                         contentValues.put("CREATION_DATE", current.getString("CREATION_DATE"));
+                        contentValues.put("Subinventory", current.getString("Subinventory"));
 
                         db_sync.InsertPreOrderOffline(contentValues);
                        // db_sync.InsertPreOrderOffline(item_code_preOrder,category,brand,model,description,image,ONHAND,UnitPrice,Color);
@@ -358,11 +352,6 @@ public class API_Sync_DB {
                     e.printStackTrace();
                 }
 
-//                try {
-//                    ((SyncActivity)activity).changePreOrderImagetoTrue();
-//                }catch (Exception e){
-//                    //e.printStackTrace();
-//                }
 
             }
         }, new Response.ErrorListener() {
@@ -379,27 +368,17 @@ public class API_Sync_DB {
     public boolean OrderOffline(final Activity activity, final Context context, String ServerConfigID, String customerNumber, String Category, String Brand, String Model, String UserName){
          db_sync = new SyncDBHelper(context);
 
-        String url_Order = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_Items_All/"+ServerConfigID+"/"+customerNumber+"/"+Category+"/"+Brand+"/"+Model+"/"+UserName+"/"+"2";
+        String url_Order = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_Items_All_Test/"+ServerConfigID+"/"+customerNumber+"/"+Category+"/"+Brand+"/"+Model+"/"+UserName+"/"+"2/0";
 
         StringRequest orderRequest = new StringRequest(Request.Method.GET, url_Order, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
                     JSONObject object = new JSONObject(response);
-                    JSONArray array = object.getJSONArray("SFA_Items_AllResult");
+                    JSONArray array = object.getJSONArray("SFA_Items_All_TestResult");
                     for(int i=0;i<array.length();i++){
                         JSONObject current = array.getJSONObject(i);
-                        /*
-                        item_code_order = current.getString("ITEM_CODE");
-                        String category = current.getString("CAT");
-                        String brand = current.getString("BRAND");
-                        String model = current.getString("MODEL");
-                        String description = current.getString("DESCRIPTION");
-                        String image = current.getString("BrandImage");
-                        String ONHAND = current.getString("ONHAND");
-                        String UnitPrice = current.getString("UnitPrice");
-                        String Color = current.getString("COLOR");
-                        */
+
                         ContentValues contentValues = new ContentValues();
                         contentValues.put("ITEM_CODE", current.getString("ITEM_CODE"));
                         contentValues.put("CAT", current.getString("CAT"));
@@ -418,6 +397,7 @@ public class API_Sync_DB {
                         contentValues.put("MAIN_CAT", current.getString("MAIN_CAT"));
                         contentValues.put("INVENTORY_ITEM_ID", current.getString("INVENTORY_ITEM_ID"));
                         contentValues.put("CREATION_DATE", current.getString("CREATION_DATE"));
+                        contentValues.put("Subinventory", current.getString("Subinventory"));
 
                         db_sync.InsertOrderOffline(contentValues);
 
@@ -489,6 +469,33 @@ public class API_Sync_DB {
         Volley.newRequestQueue(context).add(categoryRequest);
         return checkcategory;
     }
+
+    public void SFA_User_X_Subinventory(final Context context,String Username) {
+        String url;
+        db_sync = new SyncDBHelper(context);
+        url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_User_X_Subinventory/" + Username+"/1";
+        url = url.replaceAll(" ", "%20");
+
+        StringRequest CategoryRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                SFA_User_X_Subinventory  sfa_user_x_subinventory = new Gson().fromJson(response, SFA_User_X_Subinventory.class);
+                for (Subinventory sub : sfa_user_x_subinventory.getSubinventory()) {
+                    db_sync.InsertUser_X_Subinventory(sub);
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(context, "the Subinventory not available , Please check your network !", Toast.LENGTH_LONG).show();
+            }
+
+        });
+        Volley.newRequestQueue(context).add(CategoryRequest);
+    }
+
     String Brandresult;
     public boolean BrandOffline(final Activity activity, final Context context, String ServerConfigID){
         db_sync = new SyncDBHelper(context);
@@ -693,7 +700,7 @@ public class API_Sync_DB {
         Volley.newRequestQueue(context).add(ReasonRequest);
         return checkSalesReason;
     }
-
+ // Used on Sync Activity and it not active
     public boolean EndUserPriceOffline(final Activity activity, final Context context, String ServerConfigID, String UserName){
         db_sync = new SyncDBHelper(context);
 

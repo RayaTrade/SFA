@@ -40,7 +40,7 @@ public class DetailActivity extends AppCompatActivity {
     String imagepath;
     boolean itemExist;
     SharedPreferences prefs;
-
+    String subinventory;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +48,7 @@ public class DetailActivity extends AppCompatActivity {
 
         TxtSKU = (TextView) findViewById(R.id.TxtSKU);
         TxtCat = (TextView) findViewById(R.id.TxtCat);
+       // TxtSubinventory = (TextView) findViewById(R.id.TxtCat);
         TxtBrand = (TextView) findViewById(R.id.TxtBrand);
         TxtModel = (TextView) findViewById(R.id.TxtModel);
         TxtDesc = (TextView) findViewById(R.id.TxtDesc);
@@ -69,7 +70,8 @@ public class DetailActivity extends AppCompatActivity {
 
         if (extras != null) {
             TxtSKU.setText(extras.getString("productSKU"));
-            TxtCat.setText(extras.getString("productCat"));
+             subinventory = extras.getString("subinventory");
+           // TxtCat.setText(extras.getString("productCat"));
             TxtBrand.setText(extras.getString("productBrand"));
             TxtModel.setText(extras.getString("productModel"));
             TxtDesc.setText(extras.getString("productDesc"));
@@ -154,7 +156,7 @@ public class DetailActivity extends AppCompatActivity {
                             , ""
                             , extras.getString("customer_number")
                             , ""
-                            ,SelectedCustomerVisitDate,"","","","");
+                            ,SelectedCustomerVisitDate,"","","","",subinventory);
                 }
 
                 if (OpenfromOrderPage == false) {
@@ -170,6 +172,11 @@ public class DetailActivity extends AppCompatActivity {
         }
 
     }
+
+    /*
+     * # change date 7/7/2020
+     * © changed by Ahmed Ali
+     */
 
     public void AddfromPreOrder(final String Qty) {
         new AsyncTask<Void, Void, Void>() {
@@ -203,10 +210,16 @@ public class DetailActivity extends AppCompatActivity {
                             Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)));
                     productValues.put(ProductContract.ProductEntry.COLUMN_PRODUCT_product_VisitDate,
                             mProduct.getVisit_Date());
+
+                    productValues.put(ProductContract.ProductEntry.COLUMN_PRODUCT_product_Subinventory,
+                            mProduct.getSubinventory());
+
                     getContentResolver().insert(
                             ProductContract.ProductEntry.CONTENT_URI,
                             productValues
                     );
+
+
                 } else {
                     itemExist = true;
                     ContentValues productValues = new ContentValues();
@@ -220,8 +233,10 @@ public class DetailActivity extends AppCompatActivity {
                             Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)));
 
                     getContentResolver().update(ProductContract.ProductEntry.CONTENT_URI,
-                            productValues, ProductContract.ProductEntry.COLUMN_PRODUCT_SKU + " = '" + mProduct.getSKU() + "'"
-                            , null);
+                            productValues,ProductContract.ProductEntry.COLUMN_PRODUCT_SKU + " = '" + mProduct.getSKU()+"'"
+                                    + " and "+ProductContract.ProductEntry.COLUMN_PRODUCT_product_Subinventory + " = '"+mProduct.getSubinventory()+"'"
+                            ,null);
+
                 }
                 return null;
             }
@@ -247,7 +262,7 @@ public class DetailActivity extends AppCompatActivity {
                     db_order.insertItemOrder(mProduct.getSKU(), mProduct.getCategory(), mProduct.getImage()
                             , mProduct.getBrand(), mProduct.getModel(), mProduct.getDescription()
                             , mProduct.getQTY(), mProduct.getCustomer_number(), mProduct.getOnHand()
-                            , mProduct.getUnitPrice(), Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)),mProduct.Visit_Date);
+                            , mProduct.getUnitPrice(), Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)),mProduct.Visit_Date,mProduct.getSubinventory());
                 } else {
                     itemExist = true;
                     db_order.updateItemOrder(mProduct.getSKU(), mProduct.getQTY(), mProduct.getOnHand()
@@ -277,7 +292,7 @@ public class DetailActivity extends AppCompatActivity {
         Cursor productCursor = getContentResolver().query(
                 ProductContract.ProductEntry.CONTENT_URI,
                 new String[]{ProductContract.ProductEntry.COLUMN_PRODUCT_SKU},
-                ProductContract.ProductEntry.COLUMN_PRODUCT_SKU + " = '" + mProduct.getSKU() + "'",
+                ProductContract.ProductEntry.COLUMN_PRODUCT_SKU + " = '" + mProduct.getSKU()+"' and " + ProductContract.ProductEntry.COLUMN_PRODUCT_product_Subinventory + " = '"+ mProduct.getSubinventory()+"'",
                 null,
                 null);
 

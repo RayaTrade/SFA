@@ -50,13 +50,15 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
     String customer_number;
     SharedPreferences prefs;
     boolean OfflineMode = false;
-    public ProductAdapter(List<Product> productList, Context context,String customer_name,String customer_number,Activity activity,boolean OfflineMode) {
+    String Subinventory;
+    public ProductAdapter(List<Product> productList, Context context,String customer_name,String customer_number,Activity activity,boolean OfflineMode,String Subinventory) {
         this.productList = productList;
         this.context = context;
         this.customer_name = customer_name;
         this.customer_number = customer_number;
         this.activity = activity;
         this.OfflineMode = OfflineMode;
+        this.Subinventory = Subinventory;
     }
 
     @NonNull
@@ -146,7 +148,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
                                     viewHolder.RowOnHand,
                                     viewHolder.RowColor,
                                     viewHolder.RowCustomer_number,
-                                    SelectedCustomerVisitDate);
+                                    SelectedCustomerVisitDate,
+                                    Subinventory
+                                    );
                             viewHolder.EditMain_Qty.setText("");
                             closeKeyboard();
 
@@ -170,6 +174,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
                 i.putExtra("productImg",viewHolder.Rowimage);
                 i.putExtra("productPrice",Float.toString(viewHolder.RowUnitPrice));
                 i.putExtra("customer_number",viewHolder.RowCustomer_number);
+                i.putExtra("subinventory",Subinventory);
                 i.putExtra("onHand",viewHolder.onhandlbl.getText().toString());
                 i.putExtra("openfromSummary",false);
                 i.putExtra("Order",true);
@@ -220,7 +225,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
     }
 
     public void btnAddItem(final String Qty, final int position,
-                           String SKU,String Category,String Brand,String Model,String Description,String image,float UnitPrice,String OnHand,String Color,String Customer_number,String Visit_Date){
+                           String SKU,String Category,String Brand,String Model,String Description,String image,float UnitPrice,String OnHand,String Color,String Customer_number,String Visit_Date,String subinventory){
 
         if(!Qty.isEmpty()){
             if(Integer.parseInt(Qty)>=1){
@@ -236,7 +241,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
                         ,Color
                         ,Customer_number,
                         ""
-                        ,Visit_Date,"","","","");
+                        ,Visit_Date,"","","","",subinventory);
 
                 if(OpenfromOrderPage==false) {
                     AddfromPreOrder(Qty, position);
@@ -251,7 +256,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
             Toast.makeText(context,"Please enter Quantity",Toast.LENGTH_LONG).show();
         }
     }
-
+    /*
+     * # change date 7/7/2020
+     * © changed by Ahmed Ali
+     */
     public void AddfromPreOrder(final String Qty , final int position){
         new AsyncTask<Void, Void, Void>() {
 
@@ -282,8 +290,13 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
                             mProduct.getUnitPrice());
                     productValues.put(ProductContract.ProductEntry.COLUMN_PRODUCT_product_Total,
                             Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)));
+
                     productValues.put(ProductContract.ProductEntry.COLUMN_PRODUCT_product_VisitDate,
                             mProduct.getVisit_Date());
+
+                    productValues.put(ProductContract.ProductEntry.COLUMN_PRODUCT_product_Subinventory,
+                            mProduct.getSubinventory());
+
                     context.getContentResolver().insert(
                             ProductContract.ProductEntry.CONTENT_URI,
                             productValues
@@ -302,6 +315,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
 
                     context.getContentResolver().update(ProductContract.ProductEntry.CONTENT_URI,
                             productValues,ProductContract.ProductEntry.COLUMN_PRODUCT_SKU + " = '" + mProduct.getSKU()+"'"
+                            + " and "+ProductContract.ProductEntry.COLUMN_PRODUCT_product_Subinventory + " = '"+mProduct.getSubinventory()+"'"
                             ,null);
                 }
                 return null;
@@ -324,6 +338,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+
     public void AddfromOrder(final String Qty , final int position){
         final OrderDBHelper db_order = new OrderDBHelper(context);
         new AsyncTask<Void, Void, Void>() {
@@ -335,7 +350,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
                     db_order.insertItemOrder(mProduct.getSKU(),mProduct.getCategory(),mProduct.getImage()
                             ,mProduct.getBrand(),mProduct.getModel(),mProduct.getDescription()
                             ,mProduct.getQTY(),mProduct.getCustomer_number(),mProduct.getOnHand()
-                            ,mProduct.getUnitPrice(),Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)),mProduct.Visit_Date);
+                            ,mProduct.getUnitPrice(),Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)),mProduct.Visit_Date,mProduct.getSubinventory());
                 }else{
                     itemExist= true;
                     db_order.updateItemOrder(mProduct.getSKU(),mProduct.getQTY(),mProduct.getOnHand()
@@ -361,11 +376,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    /*
+     * # change date 7/7/2020
+     * © changed by Ahmed Ali
+     */
+
     private boolean isAddPreOrder() {
         Cursor productCursor = context.getContentResolver().query(
                 ProductContract.ProductEntry.CONTENT_URI,
                 new String[]{ProductContract.ProductEntry.COLUMN_PRODUCT_SKU},
-                ProductContract.ProductEntry.COLUMN_PRODUCT_SKU + " = '" + mProduct.getSKU()+"'",
+                ProductContract.ProductEntry.COLUMN_PRODUCT_SKU + " = '" + mProduct.getSKU()+"' and " + ProductContract.ProductEntry.COLUMN_PRODUCT_product_Subinventory + " = '"+ mProduct.getSubinventory()+"'",
                 null,
                 null);
 

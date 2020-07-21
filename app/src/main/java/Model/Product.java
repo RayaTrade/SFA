@@ -5,35 +5,98 @@ import com.google.gson.annotations.SerializedName;
 
 public class Product {
 
-
+    @SerializedName("ITEM_CODE")
+    @Expose
     public String SKU;
 
+    @SerializedName("CAT")
+    @Expose
     public String Category;
+    @SerializedName("BRAND")
+    @Expose
     public String Brand;
+    @SerializedName("MODEL")
+    @Expose
     public String Model;
-
+    /*@SerializedName("ONHAND")
+    @Expose*/
     public String QTY;
-
+    @SerializedName("DESCRIPTION")
+    @Expose
     public String Description;
+    @SerializedName("BrandImage")
+    @Expose
     public String image;
+    @SerializedName("UnitPrice")
+    @Expose
     public float UnitPrice;
+    @SerializedName("ONHAND")
+    @Expose
     public String OnHand;
+    @SerializedName("COLOR")
+    @Expose
     public String Color;
-    public String Total;
-    public int CollectedSerials;
-    public String Customer_number;
-    public String Visit_Date;
 
+    public String Total;
+
+    public int CollectedSerials;
+
+    @SerializedName("Customer_Number")
+    @Expose
+    public String Customer_number;
+
+
+    @SerializedName("Subinventory")
+    @Expose
+    public String Subinventory;
+
+    public String Visit_Date;
+    @SerializedName("ACC")
+    @Expose
     public String ACC;
+    @SerializedName("STATUS")
+    @Expose
     public String STATUS;
+    @SerializedName("TAX_CODE")
+    @Expose
     public String TAX_CODE ;
+    @SerializedName("TAX_RATE")
+    @Expose
     public String TAX_RATE ;
+    @SerializedName("SEGMENT1")
+    @Expose
     public String SEGMENT1 ;
+    @SerializedName("MAIN_CAT")
+    @Expose
     public String MAIN_CAT ;
+    @SerializedName("INVENTORY_ITEM_ID")
+    @Expose
     public String INVENTORY_ITEM_ID ;
+    @SerializedName("CREATION_DATE")
+    @Expose
     public String CREATION_DATE ;
 
+    @SerializedName("LENGTH")
+    @Expose
+    public String LENGTH = "";
+    @SerializedName("WEIGHT")
+    @Expose
+    public String WEIGHT = "";
+    @SerializedName("WIDTH")
+    @Expose
+    public String WIDTH = "";
+    @SerializedName("HEIGHT")
+    @Expose
+    public String HEIGHT = "";
 
+
+    public String getSubinventory() {
+        return Subinventory;
+    }
+
+    public void setSubinventory(String subinventory) {
+        Subinventory = subinventory;
+    }
     public String getLENGTH() {
         return LENGTH;
     }
@@ -66,10 +129,6 @@ public class Product {
         this.HEIGHT = HEIGHT;
     }
 
-    public String LENGTH = "";
-    public String WEIGHT = "";
-    public String WIDTH = "";
-    public String HEIGHT = "";
 
     public String getACC() {
         return ACC;
@@ -162,7 +221,7 @@ public class Product {
 
 
     public Product(String SKU, String category, String brand,String model, String QTY, String description, String image, float unitPrice, String onHand, String color, String customer_number,String total,String visit_Date,
-                    String ACC, String STATUS, String TAX_CODE ,String TAX_RATE , String SEGMENT1 , String MAIN_CAT, String INVENTORY_ITEM_ID , String CREATION_DATE ) {
+                    String ACC, String STATUS, String TAX_CODE ,String TAX_RATE , String SEGMENT1 , String MAIN_CAT, String INVENTORY_ITEM_ID , String CREATION_DATE,String subinventory ) {
         this.SKU = SKU;
         Category = category;
         Brand = brand;
@@ -184,10 +243,11 @@ public class Product {
         this.MAIN_CAT =MAIN_CAT;
         this.INVENTORY_ITEM_ID =INVENTORY_ITEM_ID ;
         this.CREATION_DATE =CREATION_DATE ;
+        this.Subinventory = subinventory;
     }
 
     public Product(String SKU, String category, String brand,String model, String QTY, String description, String image, float unitPrice, String onHand, String color, String customer_number,String total,String visit_Date,
-                   String  lENGTH ,  String  wEIGHT ,String wIDTH,String hEIGHT) {
+                   String  lENGTH ,  String  wEIGHT ,String wIDTH,String hEIGHT,String subinventory) {
         this.SKU = SKU;
         Category = category;
         Brand = brand;
@@ -205,6 +265,7 @@ public class Product {
         WEIGHT =wEIGHT;
         WIDTH =wIDTH;
         HEIGHT = hEIGHT;
+        Subinventory = subinventory;
     }
     public String getVisit_Date() {
         return Visit_Date;

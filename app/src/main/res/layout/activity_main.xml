@@ -55,6 +55,24 @@
         android:layout_height="wrap_content">
 
         <TextView
+            android:id="@+id/txtusername"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="username"
+            android:textColor="@color/colorPrimary"
+            android:textSize="15dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:text="|" />
+
+        <TextView
             android:textSize="15dp"
             android:id="@+id/TxtPageType"
             android:textColor="@color/colorPrimary"
@@ -82,32 +100,6 @@
     </LinearLayout>
 
         <View
-            android:layout_width="fill_parent"
-            android:layout_height="2dp"
-            android:layout_alignParentTop="true"
-            android:layout_centerVertical="true"
-            android:layout_marginTop="5dp"
-            android:background="@color/colorPrimary" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/txtusername"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="username"
-                android:textColor="@color/colorPrimary"
-                android:textSize="15dp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <View
-            android:id="@+id/view"
             android:layout_width="fill_parent"
             android:layout_height="2dp"
             android:layout_alignParentTop="true"
@@ -192,55 +184,112 @@
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="100dp"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:weightSum="2">
 
             <LinearLayout
-                android:layout_marginLeft="2dp"
-                android:orientation="vertical"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-                <TextView
-                    android:textColor="@android:color/black"
-                    android:layout_marginTop="5dp"
-                    android:text="Category"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <TextView
-                    android:textColor="@android:color/black"
-                    android:layout_marginTop="15dp"
-                    android:text="Brand"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <TextView
-                    android:textColor="@android:color/black"
-                    android:layout_marginTop="15dp"
-                    android:text="Model"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
-
-
-
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_weight="1"
-                android:layout_marginRight="10dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
                 android:orientation="vertical">
 
-                <Spinner
-                    android:id="@+id/spinnerCategory"
+                <LinearLayout
+                    android:id="@+id/Subinventory_Layout"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="2dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <Spinner
+                            android:id="@+id/spinnerSubinventory"
+                            android:layout_width="match_parent"
+                            android:layout_height="20dp"
+                            android:layout_marginStart="100dp"
+                            android:layout_marginTop="2dp"
+                            android:layout_marginEnd="2dp"
+                            android:layout_marginRight="47dp"
+                            android:layout_marginBottom="2dp"
+                            android:entries="@array/Subinventory_spinner" />
+
+                        <TextView
+                            android:id="@+id/subin"
+                            android:layout_width="100dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:paddingLeft="3dp"
+                            android:text="Subinventory"
+                            android:textColor="@android:color/black" />
+
+                    </RelativeLayout>
+
+                    <View
+                        android:layout_width="fill_parent"
+                        android:layout_height="2dp"
+                        android:layout_marginTop="5dp"
+                        android:background="@color/colorPrimary" />
+
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <Spinner
+                        android:id="@+id/spinnerCategory"
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:layout_alignParentRight="false"
+                        android:layout_marginStart="100dp"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginEnd="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:entries="@array/category_spinner" />
+
+                    <TextView
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="3dp"
+                        android:text="Category"
+                        android:textColor="@android:color/black" />
+                </RelativeLayout>
+
+                <View
+                    android:id="@+id/View"
+                    android:layout_width="fill_parent"
+                    android:layout_height="2dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginTop="5dp"
                     android:layout_weight="1"
-                    android:entries="@array/category_spinner" />
+                    android:background="@color/colorPrimary" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <Spinner
+                        android:id="@+id/spinnerBrand"
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:layout_alignParentRight="false"
+                        android:layout_marginStart="100dp"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginEnd="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:entries="@array/brand_spinner" />
+
+                    <TextView
+                        android:id="@+id/brand"
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="3dp"
+                        android:text="Brand"
+                        android:textColor="@android:color/black" />
+                </RelativeLayout>
 
                 <View
                     android:layout_width="fill_parent"
@@ -250,50 +299,59 @@
                     android:layout_marginTop="5dp"
                     android:background="@color/colorPrimary" />
 
-                <Spinner
-                    android:id="@+id/spinnerBrand"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="2dp"
-                    android:layout_weight="1"
-                    android:entries="@array/brand_spinner" />
+                    android:layout_height="match_parent">
 
-                <View
-                    android:layout_width="fill_parent"
-                    android:layout_height="2dp"
-                    android:layout_alignParentTop="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginTop="5dp"
-                    android:background="@color/colorPrimary" />
+                    <Spinner
+                        android:id="@+id/spinnerModel"
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:layout_alignParentStart="false"
+                        android:layout_alignParentLeft="false"
+                        android:layout_alignParentTop="false"
+                        android:layout_alignParentEnd="false"
+                        android:layout_alignParentRight="false"
+                        android:layout_marginStart="100dp"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginEnd="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:entries="@array/model_spinner" />
 
-                <Spinner
-                    android:id="@+id/spinnerModel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="2dp"
-                    android:layout_weight="1"
-                    android:entries="@array/model_spinner" />
+                    <TextView
+                        android:id="@+id/tex_model"
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="false"
+                        android:paddingLeft="3dp"
+                        android:text="Model"
+                        android:textColor="@android:color/black" />
+
+                </RelativeLayout>
 
             </LinearLayout>
 
             <LinearLayout
-                android:weightSum="2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content">
+                android:weightSum="2">
+
                 <ImageView
                     android:id="@+id/btnRefresh"
                     android:layout_width="30dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="3dp"
                     android:layout_weight="1"
                     android:src="@drawable/refresh" />
 
                 <ImageView
                     android:id="@+id/btnSearch"
-                    android:layout_weight="1"
-                    android:src="@drawable/searchflat"
                     android:layout_width="40dp"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="40dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/searchflat" />
 
             </LinearLayout>
 

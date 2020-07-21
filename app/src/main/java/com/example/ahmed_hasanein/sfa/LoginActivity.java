@@ -18,6 +18,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -36,6 +37,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -228,7 +230,49 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        Button clearcache = findViewById(R.id.clearcache);
+        clearcache.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clearApplicationData();
+            }
+        });
+
     }
+
+    ///-------
+
+    public void clearApplicationData() {
+        File cacheDirectory = getCacheDir();
+        File applicationDirectory = new File(cacheDirectory.getParent());
+        if (applicationDirectory.exists()) {
+            String[] fileNames = applicationDirectory.list();
+            for (String fileName : fileNames) {
+                if (!fileName.equals("lib")) {
+                    deleteFile(new File(applicationDirectory, fileName));
+                }
+            }
+        }
+    }
+    public static boolean deleteFile(File file) {
+        boolean deletedAll = true;
+        if (file != null) {
+            if (file.isDirectory()) {
+                String[] children = file.list();
+                for (int i = 0; i < children.length; i++) {
+                    deletedAll = deleteFile(new File(file, children[i])) && deletedAll;
+                }
+            } else {
+                deletedAll = file.delete();
+            }
+        }
+
+        return deletedAll;
+    }
+
+
+
+    /////------------
 
     @Override
     public void onResume() {
@@ -307,10 +351,12 @@ public class LoginActivity extends AppCompatActivity {
                 historyPermission = true;
             }
         }
+        User user = db_sync.getUserfromLoginOffline();
         intent.putExtra("preOrderPermission", preOrderPermission);
         intent.putExtra("OrderPermission", OrderPermission);
         intent.putExtra("historyPermission", historyPermission);
         User.Username = emailpref;
+        User.Allow_Delivery_Method = user.isAllow_Delivery_Method();
         startActivity(intent);
         finish();
     }
@@ -484,7 +530,7 @@ public class LoginActivity extends AppCompatActivity {
                 db_sync.deleteAllEndUserPriceOfflineOffline();
                 db_sync.deleteAllGetStockSerialsOffline();
                 db_sync.deleteAllTransactionTypesOffline();
-
+                db_sync.deleteAllUser_X_Subinventory();
             }
 
             @Override
@@ -515,7 +561,7 @@ public class LoginActivity extends AppCompatActivity {
 
         }.execute();
     }
-
+//5
     public void SyncPermssions(final String userID) {
         new AsyncTask<String, Integer, String>() {
             //String userID;
@@ -540,18 +586,18 @@ public class LoginActivity extends AppCompatActivity {
             protected void onPostExecute(String s) {
                 super.onPostExecute(s);
                 pDialog.setProgress(5);
-                pDialog.setMessage("Sync Customers...");
+                pDialog.setMessage("Sync Permssions...");
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         SyncTruckType(userIDpref);
                     }
-                }, 2000);
+                }, 5000);
 
             }
         }.execute();
     }
-
+//5
     public void SyncTruckType(final String userID) {
         new AsyncTask<String, Integer, String>() {
             //String userID;
@@ -582,12 +628,12 @@ public class LoginActivity extends AppCompatActivity {
                     public void run() {
                         SyncSyncItemDimensions(userIDpref);
                     }
-                }, 2000);
+                }, 5000);
 
             }
         }.execute();
     }
-
+//5
     public void SyncSyncItemDimensions(final String userID) {
         new AsyncTask<String, Integer, String>() {
             //String userID;
@@ -618,12 +664,12 @@ public class LoginActivity extends AppCompatActivity {
                     public void run() {
                         SyncCustomer();
                     }
-                }, 3000);
+                }, 5000);
 
             }
         }.execute();
     }
-
+//5
     public void SyncCustomer() {
         new AsyncTask<String, Integer, String>() {
 
@@ -652,14 +698,12 @@ public class LoginActivity extends AppCompatActivity {
                     public void run() {
                         TransactionTypes(ServerConfigIDpref);
                     }
-                }, 2000);
+                }, 5000);
             }
 
         }.execute();
     }
-
-
-
+//5
     public void TransactionTypes(final String ServerConfigIDpref) {
         new AsyncTask<String, Integer, String>() {
 
@@ -686,14 +730,52 @@ public class LoginActivity extends AppCompatActivity {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        SyncPreOrder(ServerConfigIDpref);
+                        SyncSubinventory(ServerConfigIDpref);
                     }
-                }, 2000);
+                }, 5000);
             }
 
         }.execute();
     }
+//5
+    public void SyncSubinventory(final String ServerConfigID) {
+        new AsyncTask<String, Integer, String>() {
 
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                db_sync.deleteAllUser_X_Subinventory();
+            }
+
+            @Override
+            protected String doInBackground(String... params) {
+
+                db_sync = new SyncDBHelper(getBaseContext());
+
+                apiSyncDB.SFA_User_X_Subinventory(getBaseContext(),emailpref);
+
+                return null;
+
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                pDialog.setProgress(22);
+                pDialog.setMessage("Sync Subinventory items...");
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        SyncPreOrder(ServerConfigIDpref);
+                    }
+                }, 5000);
+
+            }
+
+
+        }.execute();
+    }
+//5
     public void SyncPreOrder(final String ServerConfigID) {
         new AsyncTask<String, Integer, String>() {
 
@@ -724,14 +806,14 @@ public class LoginActivity extends AppCompatActivity {
                     public void run() {
                         SyncOrder(ServerConfigIDpref);
                     }
-                }, 2000);
+                }, 5000);
 
             }
 
 
         }.execute();
     }
-
+//5
     public void SyncOrder(final String ServerConfigID) {
         new AsyncTask<String, Integer, String>() {
 
@@ -762,12 +844,12 @@ public class LoginActivity extends AppCompatActivity {
                     public void run() {
                         SyncCategory(ServerConfigIDpref);
                     }
-                }, 2000);
+                }, 5000);
             }
 
         }.execute();
     }
-
+//5
     public void SyncCategory(final String ServerConfigID) {
         new AsyncTask<String, Integer, String>() {
 
@@ -798,13 +880,13 @@ public class LoginActivity extends AppCompatActivity {
                     public void run() {
                         SyncBrand(ServerConfigIDpref);
                     }
-                }, 2000);
+                }, 5000);
 
             }
 
         }.execute();
     }
-
+//5
     public void SyncBrand(final String ServerConfigID) {
         new AsyncTask<String, Integer, String>() {
 
@@ -835,14 +917,14 @@ public class LoginActivity extends AppCompatActivity {
                     public void run() {
                         SyncModel(ServerConfigIDpref);
                     }
-                }, 2000);
+                }, 5000);
 
             }
 
 
         }.execute();
     }
-
+//5
     public void SyncModel(final String ServerConfigID) {
         new AsyncTask<String, Integer, String>() {
 
@@ -873,12 +955,12 @@ public class LoginActivity extends AppCompatActivity {
                     public void run() {
                         SyncDeliveryMethod(ServerConfigIDpref);
                     }
-                }, 2000);
+                }, 5000);
             }
 
         }.execute();
     }
-
+//5
     public void SyncDeliveryMethod(final String ServerConfigID) {
         new AsyncTask<String, Integer, String>() {
 
@@ -909,13 +991,13 @@ public class LoginActivity extends AppCompatActivity {
                     public void run() {
                         SyncTenderType(ServerConfigIDpref);
                     }
-                }, 2000);
+                }, 5000);
 
             }
 
         }.execute();
     }
-
+//5
     public void SyncTenderType(final String ServerConfigID) {
         new AsyncTask<String, Integer, String>() {
 
@@ -946,13 +1028,13 @@ public class LoginActivity extends AppCompatActivity {
                     public void run() {
                         SyncEndUserPrice(ServerConfigIDpref, emailpref);
                     }
-                }, 2000);
+                }, 5000);
 
             }
 
         }.execute();
     }
-
+//5
     public void SyncEndUserPrice(final String ServerConfigID, final String Username) {
         new AsyncTask<String, Integer, String>() {
 
@@ -986,13 +1068,13 @@ public class LoginActivity extends AppCompatActivity {
                     public void run() {
                         SyncCustomerWithVisit(ServerConfigIDpref, emailpref);
                     }
-                }, 2000);
+                }, 5000);
             }
 
 
         }.execute();
     }
-
+//5
     public void SyncCustomerWithVisit(final String ServerConfigID, final String Username) {
         new AsyncTask<String, Integer, String>() {
 
@@ -1023,13 +1105,13 @@ public class LoginActivity extends AppCompatActivity {
                     public void run() {
                         SyncSalesReason(ServerConfigID);
                     }
-                }, 2000);
+                }, 5000);
             }
 
 
         }.execute();
     }
-
+//5
     public void SyncSalesReason(final String ServerConfigID) {
         new AsyncTask<String, Integer, String>() {
 
@@ -1061,13 +1143,13 @@ public class LoginActivity extends AppCompatActivity {
                         SFA_GetPromotions(ServerConfigID);
 
                     }
-                }, 2000);
+                }, 5000);
             }
 
 
         }.execute();
     }
-
+//5
     public void SFA_GetPromotions(final String ServerConfigID) {
         new AsyncTask<String, Integer, String>() {
 
@@ -1100,14 +1182,13 @@ public class LoginActivity extends AppCompatActivity {
                     public void run() {
                         SyncGetStockSerials(emailpref);
                     }
-                }, 2000);
+                }, 5000);
             }
 
 
         }.execute();
     }
-
-
+//5
     public void SyncGetStockSerials(final String Username) {
         new AsyncTask<String, Integer, String>() {
 
@@ -1134,16 +1215,22 @@ public class LoginActivity extends AppCompatActivity {
             protected void onPostExecute(String s) {
                 super.onPostExecute(s);
                 //Toast.makeText(getBaseContext(),"finsih",Toast.LENGTH_SHORT).show();
-                dismissDialog(progress_bar_type);
-                Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
-                intent.putExtra("DeviceID", User.DeviceID);
-                intent.putExtra("preOrderPermission", preOrderPermission);
-                intent.putExtra("OrderPermission", OrderPermission);
-                intent.putExtra("historyPermission", historyPermission);
-                User.Username = email.getText().toString();
+               new Handler().postDelayed(new Runnable() {
+                   @Override
+                   public void run() {
+                       dismissDialog(progress_bar_type);
+                       Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
+                       intent.putExtra("DeviceID", User.DeviceID);
+                       intent.putExtra("preOrderPermission", preOrderPermission);
+                       intent.putExtra("OrderPermission", OrderPermission);
+                       intent.putExtra("historyPermission", historyPermission);
+                       User.Username = email.getText().toString();
 //                dialog.dismiss();
-                startActivity(intent);
-                finish();
+                       startActivity(intent);
+                       finish();
+                   }
+               },5000);
+
             }
 
 

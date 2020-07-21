@@ -31,6 +31,7 @@ public class ProductContract {
         public static final String COLUMN_PRODUCT_product_UnitPrice = "UnitPrice";
         public static final String COLUMN_PRODUCT_product_Total = "Total";
         public static final String COLUMN_PRODUCT_product_VisitDate = "Visit_Date";
+        public static final String COLUMN_PRODUCT_product_Subinventory = "Subinventory";
 
         public static Uri buildPRODUCTUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
@@ -48,7 +49,8 @@ public class ProductContract {
                 COLUMN_PRODUCT_product_OnHand,
                 COLUMN_PRODUCT_product_UnitPrice,
                 COLUMN_PRODUCT_product_Total,
-                COLUMN_PRODUCT_product_VisitDate
+                COLUMN_PRODUCT_product_VisitDate,
+                COLUMN_PRODUCT_product_Subinventory
         };
 
         public static final int COL_PRODUCT_SKU = 0;
@@ -63,5 +65,6 @@ public class ProductContract {
         public static final int COL_PRODUCT_product_UnitPrice = 9;
         public static final int COL_PRODUCT_product_Total = 10;
         public static final int COL_PRODUCT_product_VisitDate = 11;
+        public static final int COL_PRODUCT_product_Subinventory = 12;
     }
 }

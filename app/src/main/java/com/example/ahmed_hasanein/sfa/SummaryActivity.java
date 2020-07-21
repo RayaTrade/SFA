@@ -253,21 +253,36 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
 
                             Trucktext.setText(truck.getType().toString());
                             TruckSpacetext.setText(String.valueOf(new DecimalFormat("##.##").format(100 - (productSize / truck.getSize()) * 100)) + "%");
-                            if (count != truck.getSize())
-                                text = "1 Car";
-                            else
-                                text = String.valueOf((int) (productSize / truck.getSize())) + "Car";
+                            text = "1 Car";
                             TruckNumtext.setText(text);
                             if (productList.size() != productDimensions.length) {
                                 Recomendtext.setTextColor(Color.RED);
                                 text = "Note that not all items dimensions calculate.";
                                 Recomendtext.setText(text);
                             }
+                            truck.setCount(1);
                             break;
                         }
                     }
                     count++;
 
+                }
+                if(text.equals(""))
+                {
+                    int lastTruck = trucks.getTruckType().size() -1;
+                    Trucktext.setText(trucks.getTruckType().get(lastTruck  ).getType());
+                    double car_size = trucks.getTruckType().get(lastTruck).getSize();
+                    double prduct_size = productSize;
+
+                     int cars  = (int) (  prduct_size/car_size ) +1 ;
+                    TruckSpacetext.setText(String.valueOf(new DecimalFormat("##.##").format(100 - (productSize /  (cars * trucks.getTruckType().get(lastTruck).getSize())) * 100)) + "%");
+                    TruckNumtext.setText(String.valueOf( cars ) + " Cars");
+                    if (productList.size() != productDimensions.length) {
+                        Recomendtext.setTextColor(Color.RED);
+                        text = "Note that not all items dimensions calculate.";
+                        Recomendtext.setText(text);
+                    }
+                    trucks.getTruckType().get(lastTruck).setCount(cars);
                 }
             }
             else
@@ -279,6 +294,7 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
                 String text = "Note that not all items dimensions calculate.";
                 Recomendtext.setText(text);
             }
+            if(Prodialog != null)
             Prodialog.dismiss();
         }
         catch (Exception ex)
@@ -373,7 +389,7 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
                 delivery_layout.setVisibility(View.GONE);
 
                 mProgressBar.setVisibility(View.GONE);
-                if(Prodialog.isShowing())
+                if(Prodialog != null && Prodialog.isShowing())
                     Prodialog.dismiss();
 
             }
@@ -550,7 +566,7 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
             db_sync.InsertTransactionTenderOffline(Headerid, spinnerTenderType.getSelectedItem().toString(), emailpref, String.valueOf(total));
 
             for (Product product : productList) {
-                db_sync.InsertTransactionItemsOffline(Headerid, product.SKU, product.QTY, String.valueOf(product.UnitPrice), "0", emailpref, product.OnHand);
+                db_sync.InsertTransactionItemsOffline(Headerid, product.SKU, product.QTY, String.valueOf(product.UnitPrice), "0", emailpref, product.OnHand,product.Subinventory);
             }
 
             SFA_GetTruckType trucks = new API_Sync_Back().Trucks;

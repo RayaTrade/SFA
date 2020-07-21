@@ -66,7 +66,7 @@ public class SynBackItemFragment extends DialogFragment {
                         String Qty = current.getString("Qty");
                         String Total = current.getString("Total");
                         String UnitPrice = current.getString("UnitPrice");
-                        PreOrderHistoryDetail items = new PreOrderHistoryDetail(ItemCode,Brand,Model,Description,Qty,Total,UnitPrice);
+                        PreOrderHistoryDetail items = new PreOrderHistoryDetail(ItemCode,Brand,Model,Description,Qty,Total,UnitPrice,"");
                         itemsList.add(items);
 
                     }

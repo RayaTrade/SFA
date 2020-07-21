@@ -36,7 +36,8 @@ public class ProductDBHelper extends SQLiteOpenHelper {
                 ProductContract.ProductEntry.COLUMN_PRODUCT_product_OnHand + " TEXT NOT NULL, " +
                 ProductContract.ProductEntry.COLUMN_PRODUCT_product_UnitPrice + " TEXT NOT NULL, " +
                 ProductContract.ProductEntry.COLUMN_PRODUCT_product_Total + " TEXT NOT NULL, " +
-                ProductContract.ProductEntry.COLUMN_PRODUCT_product_VisitDate + " TEXT NOT NULL " +
+                ProductContract.ProductEntry.COLUMN_PRODUCT_product_VisitDate + " TEXT NOT NULL ," +
+                ProductContract.ProductEntry.COLUMN_PRODUCT_product_Subinventory + " TEXT NOT NULL " +
                 " );";
         sqLiteDatabase.execSQL(SQL_CREATE_PRODUCT_TABLE);
     }
@@ -73,6 +74,7 @@ public class ProductDBHelper extends SQLiteOpenHelper {
                 product.setUnitPrice(Float.valueOf(cursor.getString(cursor.getColumnIndex(ProductContract.ProductEntry.COLUMN_PRODUCT_product_UnitPrice))));
                 product.setTotal(cursor.getString(cursor.getColumnIndex(ProductContract.ProductEntry.COLUMN_PRODUCT_product_Total)));
                 product.setVisit_Date(cursor.getString(cursor.getColumnIndex(ProductContract.ProductEntry.COLUMN_PRODUCT_product_VisitDate)));
+                product.setSubinventory(cursor.getString(cursor.getColumnIndex(ProductContract.ProductEntry.COLUMN_PRODUCT_product_Subinventory)));
                 products.add(product);
             } while (cursor.moveToNext());
 

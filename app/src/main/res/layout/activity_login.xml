@@ -83,6 +83,13 @@
                 <!--android:textOn="Online" />-->
 
 
+            <Button
+                android:id="@+id/clearcache"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:text="C" />
+
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">

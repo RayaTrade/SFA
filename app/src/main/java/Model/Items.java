@@ -14,6 +14,9 @@ public class Items {
     private String QtyinStock;
 
 
+    private String Subinventory;
+
+
     //------------
     @SerializedName("ITEM_CODE")
     @Expose
@@ -38,6 +41,15 @@ public class Items {
     public void setONHAND_Receipt(String ONHAND) {
         this.ONHAND = ONHAND;
     }
+
+    public String getSubinventory() {
+        return Subinventory;
+    }
+
+    public void setSubinventory(String subinventory) {
+        Subinventory = subinventory;
+    }
+
 
     //-----------------
 

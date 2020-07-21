@@ -53,12 +53,15 @@ import Adapter.HistoryDetailAdapter;
 import Model.Customer;
 import Model.OrderReceipt;
 import Model.Parsing_Json.SFA_GetTruckType;
+import Model.Parsing_Json.SFA_Items_All;
+import Model.Parsing_Json.SFA_User_X_Subinventory;
 import Model.Permission;
 import Model.PreOrderHistory;
 import Model.PreOrderHistoryDetail;
 import Model.Product;
 import Model.ProductDimension;
 import Model.Serial;
+import Model.Subinventory;
 import Model.TruckType;
 import Model.User;
 import Utility.DialogHint;
@@ -93,12 +96,6 @@ public class API_Online extends LoginActivity{
         final SharedPreferences.Editor editor;
         SharedPreferences prefs;
         prefs = context.getSharedPreferences("login_data", MODE_PRIVATE);
-/*
-        String url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_Login/"
-                + "356027082361034" + "/" + email
-                + "/" + password;
-
-*/
 
         String url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_Login/"
                 + User.DeviceID + "/" + email
@@ -116,13 +113,6 @@ public class API_Online extends LoginActivity{
         editor.putString("My_email", email);
         editor.putString("My_password", password);
         editor.putString("My_DeviceID", User.DeviceID);
-      /*  try{
-           editor.putString("Logs", new LogCat().CreateFile(activity,String.valueOf(email+"_"+DeviceIDpref+"_"+new Date().getDate())));
-        }
-        catch (Exception e)
-        {}*/
-
-
 
         StringRequest loginRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
@@ -365,7 +355,7 @@ public class API_Online extends LoginActivity{
                             result = "All";
                         }
                         categoryList.add(result);
-                        LayoutWaitingMainList.setVisibility(View.GONE);
+                  //      LayoutWaitingMainList.setVisibility(View.GONE);
                     }
 
                 } catch (JSONException e) {
@@ -383,6 +373,44 @@ public class API_Online extends LoginActivity{
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(context, "this category not available , Please check your network !", Toast.LENGTH_LONG).show();
+            //    LayoutWaitingMainList.setVisibility(View.GONE);
+            }
+
+        });
+        Volley.newRequestQueue(context).add(CategoryRequest);
+    }
+
+    List<String> SubinventoryList;
+    public static  SFA_User_X_Subinventory sfa_user_x_subinventory;
+
+    public void SFA_User_X_Subinventory(final LinearLayout LayoutWaitingMainList, final Spinner spinner, final Context context,String TransactionType) {
+        String urlCat;
+
+        urlCat = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_User_X_Subinventory/" + User.Username+"/"+TransactionType;
+        urlCat = urlCat.replaceAll(" ", "%20");
+
+        StringRequest CategoryRequest = new StringRequest(Request.Method.GET, urlCat, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                sfa_user_x_subinventory = new Gson().fromJson(response,SFA_User_X_Subinventory.class);
+                SubinventoryList = new ArrayList<>();
+                for (Subinventory sub : sfa_user_x_subinventory.getSubinventory()) {
+                    SubinventoryList.add(sub.getSubinventory());
+                }
+                LayoutWaitingMainList.setVisibility(View.GONE);
+                try {
+                    //Setting adapter to show the items in the spinner
+                    spinner.setAdapter(new ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item, SubinventoryList));
+                } catch (Exception e) {
+                    Toast.makeText(context, "the Subinventory not available", Toast.LENGTH_LONG).show();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(context, "the Subinventory not available , Please check your network !", Toast.LENGTH_LONG).show();
                 LayoutWaitingMainList.setVisibility(View.GONE);
             }
 
@@ -721,8 +749,8 @@ public class API_Online extends LoginActivity{
         }
     }
 
-    public void SFA_Items_All(final Context context, final Activity activity, String Category, final String customerNumber, String Brand, String Model, String TransactionType) {
-        String url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_Items_All/" + User.ServerConfigID + "/" + customerNumber + "/" + Category + "/" + Brand + "/" + Model + "/" + User.Username + "/" + TransactionType;
+    public void SFA_Items_All(final Context context, final Activity activity, String Category, final String customerNumber, String Brand, String Model, String TransactionType, String subinventoryID) {
+        String url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_Items_All_Test/" + User.ServerConfigID + "/" + customerNumber + "/" + Category + "/" + Brand + "/" + Model + "/" + User.Username + "/" + TransactionType+"/"+subinventoryID;
 
         url = url.replaceAll(" ", "%20");
         Log.d("PRODUCT_URL", url);
@@ -732,10 +760,13 @@ public class API_Online extends LoginActivity{
             @Override
             public void onResponse(String response) {
                 try {
-                    JSONObject object = new JSONObject(response);
-                    JSONArray array = object.getJSONArray("SFA_Items_AllResult");
+                    //JSONObject object = new JSONObject(response);
+                   // JSONArray array = object.getJSONArray("SFA_Items_AllResult");
+                    SFA_Items_All sfa_items_all = new Gson().fromJson(response,SFA_Items_All.class);
+
                     productList = new ArrayList<>();
-                    for (int i = 0; i < array.length(); i++) {
+                    productList = sfa_items_all.getProducts();
+                    /*for (int i = 0; i < array.length(); i++) {
                         JSONObject current = array.getJSONObject(i);
                         String item_code = current.getString("ITEM_CODE");
                         String category = current.getString("CAT");
@@ -746,16 +777,12 @@ public class API_Online extends LoginActivity{
                         String ONHAND = current.getString("ONHAND");
                         String UnitPrice = current.getString("UnitPrice");
                         String Color = current.getString("COLOR");
+                        String Subinventory = current.getString("Subinventory");
 
-                        String HEIGHT = current.getString("HEIGHT");
-                        String WEIGHT = current.getString("WEIGHT");
-                        String LENGTH = current.getString("LENGTH");
-                        String WIDTH = current.getString("WIDTH");
-
-                        Product product = new Product(item_code, category, brand, model, "", description, image, Float.valueOf(UnitPrice), ONHAND, Color, customerNumber, "", "",LENGTH,WEIGHT,WIDTH,HEIGHT);
+                        Product product = new Product(item_code, category, brand, model, "", description, image, Float.valueOf(UnitPrice), ONHAND, Color, customerNumber, "", "","","","","");
                         productList.add(product);
-                    }
-                } catch (JSONException e) {
+                    }*/
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 ((MainActivity) activity).RenderList(productList);
@@ -976,7 +1003,7 @@ public class API_Online extends LoginActivity{
      */
     String Key="",count_of_online_items="";
 
-    private JSONArray Convert_Array_to_Json_to (String HeaderId,Context context,List<Product> productList)
+    private JSONArray Convert_Array_to_Json_to (String HeaderId,Context context,List<Product> productList,String TransactionType)
     {
         JSONArray array = new JSONArray();
         ArrayList<String> Serial_list = new ArrayList<>();
@@ -993,13 +1020,15 @@ public class API_Online extends LoginActivity{
                         object.put("QtyinStock",product.OnHand);
                         object.put("Discount","0");
                         object.put("UnitPrice" , product.UnitPrice);
-                try {
-                    Serial_list = ((CollectSerialActivity) activity).List_getSerialsByItemCode(HeaderId,context,product.SKU);
+                        object.put("Subinventory" , product.Subinventory);
+                if(TransactionType.equals("1")) {
+                    try {
+                        Serial_list = ((CollectSerialActivity) activity).List_getSerialsByItemCode(HeaderId, context, product.SKU);
                         Log.d("serials  ", serials + "product.getSKU  " + product.SKU);
-                    }catch (Exception e){
-                    serials = "";
+                    } catch (Exception e) {
+                        serials = "";
                     }
-
+                }
 
                     object.put("Serial", new JSONArray(Serial_list));
 
@@ -1062,7 +1091,7 @@ public class API_Online extends LoginActivity{
                 object.accumulate("TransactionType", TransactionType);
                 object.accumulate("OfflineID", OfflineID);
                 object.accumulate("HeaderID", "");
-                object.accumulate("Product_List", Convert_Array_to_Json_to("0",context,productList));
+                object.accumulate("Product_List", Convert_Array_to_Json_to("0",context,productList,TransactionType));
                 object.accumulate("OpenFrom", OpenFrom);
                 object.accumulate("TenderType", TenderType);
                 object.accumulate("Amount", String.valueOf(Calcualte_Amount(productList)));
@@ -1086,7 +1115,7 @@ public class API_Online extends LoginActivity{
 
             String url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_SavaOrder_OneBulk";
 
-        //    String url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_SavaOrder_OneBulk_PromotionTest";
+        // String url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_SavaOrder_OneBulk_PromotionTest";
             Log.d("HEADER_URL", url);
 
             new Http().httpPost(url, String.valueOf(object), new Http.RequestCallback() {
@@ -1110,7 +1139,7 @@ public class API_Online extends LoginActivity{
                             saved = true;
 
                             Intent i = new Intent(context, FinishOnlineActivity.class);
-                            if (result != null) {
+                            if (result != null && !orderReceipt.getTotalAmount().equals("")) {
 
                                 new OrderReceipt().setOrderReceipt(orderReceipt);
                                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1132,7 +1161,7 @@ public class API_Online extends LoginActivity{
 
                             } else {
                                 dialogSave.dismiss();
-                                Toast.makeText(context, "try again", Toast.LENGTH_LONG).show();
+                                Toast.makeText(context, orderReceipt.getOrderId(), Toast.LENGTH_LONG).show();
                             }
 
                         } else {
@@ -1160,7 +1189,7 @@ public class API_Online extends LoginActivity{
         JSONObject object = new JSONObject();
         try {
             object.accumulate("HeaderID", Header);
-            object.accumulate("Product_List", Convert_Array_to_Json_to(Header,context,Items));
+            object.accumulate("Product_List", Convert_Array_to_Json_to(Header,context,Items,"2"));
         }
         catch (JSONException e) {
             e.printStackTrace();
@@ -1293,7 +1322,7 @@ public class API_Online extends LoginActivity{
                         String Qty = current.getString("Qty");
                         String Total = current.getString("Total");
                         String UnitPrice = current.getString("UnitPrice");
-                        PreOrderHistoryDetail preOrderHistoryDetail = new PreOrderHistoryDetail(ItemCode, Brand, Model, Description, Qty, Total, UnitPrice);
+                        PreOrderHistoryDetail preOrderHistoryDetail = new PreOrderHistoryDetail(ItemCode, Brand, Model, Description, Qty, Total, UnitPrice,"");
                         preOrderHistoryDetailList.add(preOrderHistoryDetail);
 
                     }
@@ -1316,44 +1345,7 @@ public class API_Online extends LoginActivity{
         Volley.newRequestQueue(context).add(historyRequest);
     }
 
-    String Serial_item_id = "";
 
-    public void SFA_SavePreOrderDetails_serials(final Context context, final String OrderHeaderid, final String DetailsID, final String Serials) {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                String SerialsURL = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_SavePreOrderDetails_serials/" + OrderHeaderid + "/"
-                        + DetailsID + "/" + Serials;
-
-                Log.d("SerialsURL", SerialsURL);
-
-                SerialsURL = SerialsURL.replaceAll(" ", "%20");
-
-                StringRequest SerialRequest = new StringRequest(Request.Method.GET, SerialsURL, new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            String result = jsonObject.getString("SFA_SavePreOrderDetails_serialsResult");
-                            if (result.equals("1")) {
-                            } else {
-                                Toast.makeText(context, "Order Serials Not Saved " + Serial_item_id, Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(context, "Please try Again Order Serials not Save", Toast.LENGTH_LONG).show();
-                        error.printStackTrace();
-                    }
-                });
-                Volley.newRequestQueue(context).add(SerialRequest);
-            }
-        }, 500);
-    }
 
     public boolean RequestForCancel(final String orderId, final Context context, final ProgressDialog dialog) {
         String urlCancel;

@@ -9,7 +9,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.net.ConnectivityManager;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +18,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,12 +43,12 @@ import Adapter.ProductDealerAdapter;
 import FillSpinners.BrandSpinner;
 import FillSpinners.CategorySpinner;
 import FillSpinners.ModelSpinner;
+import FillSpinners.SubinventorySpinner;
 import Model.Brand;
 import Model.Category;
 import Model.Model;
 import Model.Product;
 import Model.User;
-import Model.Serial;
 import Utility.Connectivity;
 import Utility.CountCartDrawable;
 import Utility.NetworkChangeReceiver;
@@ -63,6 +61,7 @@ import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromDealerOrd
 import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromOrderPage;
 import static com.example.ahmed_hasanein.sfa.LoginActivity.OfflineMode;
 
+import Model.Subinventory;
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
     TextView txtCustomerNumber, txtCustomerName, TxtMainTotalPrice, txtVNumbermain, TxtNoItemfound, TxtPageType, cart_item_notification, TxtbuttomSheetTitle, TxtButtonSheetVisitDate;
@@ -77,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     ImageView btnRefresh;
     ImageView btnSearch;
     CardView btnSummary;
-    private Spinner spinnerCategory, spinnerBrand, spinnerModel;
+    private Spinner spinnerSubinventory,spinnerCategory, spinnerBrand, spinnerModel;
     String url;
     List<Product> productList;
     List<Product> productListDB;
@@ -88,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     Bundle extras;
     String Category;
     List<String> categoryList;
+    List<String> SubinventoryList;
     String Brand;
     List<String> brandList;
     String Model;
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     Button btnbuttomSheetshowDetails, btnBottomSheetSummaryMain;
     public ProgressDialog DropDownListDialogMainActivity;
     static TextView LayoutMainOffline;
-    LinearLayout LayoutWaitingMainList;
+    LinearLayout LayoutWaitingMainList,Subinventory_Layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         txtVNumbermain = (TextView) findViewById(R.id.txtVNumbermain);
         btnSearch = (ImageView) findViewById(R.id.btnSearch);
         spinnerCategory = (Spinner) findViewById(R.id.spinnerCategory);
+        spinnerSubinventory = (Spinner) findViewById(R.id.spinnerSubinventory);
         spinnerBrand = (Spinner) findViewById(R.id.spinnerBrand);
         spinnerModel = (Spinner) findViewById(R.id.spinnerModel);
         tableLayout = (TableLayout) findViewById(R.id.tableLayout);
@@ -156,6 +157,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         btnBottomSheetSummaryMain = (Button) findViewById(R.id.btnBottomSheetSummaryMain);
         LayoutMainOffline = (TextView) this.findViewById(R.id.marque_scrolling_text_main);
         LayoutWaitingMainList = (LinearLayout) findViewById(R.id.LayoutWaitingMainList);
+        Subinventory_Layout = (LinearLayout) findViewById(R.id.Subinventory_Layout);
         txtVNumbermain.setText("Version " + BuildConfig.VERSION_NAME + "," + BuildConfig.VERSION_CODE); //set textview for version number
         mProgressBar.setVisibility(View.GONE);
         /*
@@ -164,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
          * -- description: .........
          *   txtusername.setText(User.Username);
          */
-        txtusername.setText("UserName | "+User.Username);
+        txtusername.setText(User.Username.replace("@rayacorp.com",""));
 
         // toolbar fancy stuff
         setSupportActionBar(toolbar);
@@ -249,14 +251,17 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             TxtPageType.setText("Pre-Order");
             TxtbuttomSheetTitle.setText("Pre-Order Details");
             cart_item_notification.setText(String.valueOf(db.getAllProduct().size()));
+            Subinventory_Layout.setVisibility(View.VISIBLE);
         } else if (OpenfromOrderPage == true) {
             TxtPageType.setText("Order");
             TxtbuttomSheetTitle.setText("Order Details");
             cart_item_notification.setText(String.valueOf(db_order.getAllOrder().size()));
+            Subinventory_Layout.setVisibility(View.GONE);
         } else if (OpenfromDealerOrder == true) {
             TxtPageType.setText("Dealer Order");
             TxtbuttomSheetTitle.setText("Dealer Details");
             cart_item_notification.setText(String.valueOf(db_dealer.getAllDealerOrder().size()));
+            Subinventory_Layout.setVisibility(View.GONE);
         }
 
 
@@ -296,7 +301,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             @Override
             public void onClick(View v) {
                 LayoutWaitingMainList.setVisibility(View.VISIBLE);
-                categorySpinner.GetCategory(LayoutWaitingMainList, spinnerCategory, getBaseContext(), OfflineMode);
+         //       categorySpinner.GetCategory(LayoutWaitingMainList, spinnerCategory, getBaseContext(), OfflineMode);
+               new SubinventorySpinner(getBaseContext()).GetUser_X_Subinventory(LayoutWaitingMainList,spinnerSubinventory,getBaseContext(),OfflineMode,OpenfromOrderPage,OpenfromDealerOrder);
             }
         });
 
@@ -340,15 +346,18 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 String category = "All";
                 String brand = "All";
                 String model = "All";
+                String SubinventoryID = "0";
                 if (spinnerCategory != null && spinnerBrand != null && spinnerModel != null) {
                     try {
                         category = spinnerCategory.getSelectedItem().toString();
                         brand = spinnerBrand.getSelectedItem().toString();
                         model = spinnerModel.getSelectedItem().toString();
+                        SubinventoryID = new SubinventorySpinner(getBaseContext()).find_SubinventoryID(spinnerSubinventory.getSelectedItem().toString());
                     } catch (Exception e) {
                         category = "ALL";
                         brand = "ALL";
                         model = "ALL";
+                        SubinventoryID = "0";
                         mProgressBar.setVisibility(View.GONE);
                         Toast.makeText(getBaseContext(), "please click refresh and try again ", Toast.LENGTH_SHORT).show();
                     }
@@ -361,10 +370,10 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                         //////////////////////////////Offline Items/////////////////////////////////////////////
                         if (db_sync.checkifPreorderOfflineisEmpty() == false) {
                             productList = new ArrayList<>();
-                            for (Product p : db_sync.getAllPreOrderOffline(SelectedCustomerNumber)) {
+                            for (Product p : db_sync.getAllPreOrderOffline(SelectedCustomerNumber,spinnerSubinventory.getSelectedItem().toString())) {
 
                                 Product product = new Product(p.SKU, p.Category, p.Brand, p.Model, "", p.Description, p.image, Float.valueOf(p.getUnitPrice()), p.OnHand, p.Color, SelectedCustomerNumber, "", p.Visit_Date,p.ACC,
-                                        p.STATUS,p.TAX_CODE,p.TAX_RATE ,p.SEGMENT1 ,p.MAIN_CAT ,p.INVENTORY_ITEM_ID ,p.CREATION_DATE );
+                                        p.STATUS,p.TAX_CODE,p.TAX_RATE ,p.SEGMENT1 ,p.MAIN_CAT ,p.INVENTORY_ITEM_ID ,p.CREATION_DATE , p.Subinventory);
                                 productList.add(product);
                             }
                             RenderList(productList);
@@ -375,7 +384,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                         ////////////////////////////////////////////////////////////////////////////////////////////
                     } else {
                         ////////////////Online Items////////////////////////////////////////////////////////////////
-                        new API_Online().SFA_Items_All(getBaseContext(), MainActivity.this, category, txtCustomerNumber.getText().toString(), brand, model, "1"); //preorder
+                        new API_Online().SFA_Items_All(getBaseContext(), MainActivity.this, category, txtCustomerNumber.getText().toString(), brand, model, "1",SubinventoryID); //preorder
                         ////////////////////////////////////////////////////////////////////////////////////////////
                     }
                 } else if (OpenfromOrderPage == true || openfromOrder == true) {
@@ -385,7 +394,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                             ///////////////////////////Offline Items//////////////////////////////////////////////////
                             for (Product p : db_sync.getAllOrderOffline(SelectedCustomerNumber)) {
                                 Product product = new Product(p.SKU, p.Category, p.Brand, p.Model, "", p.Description, p.image, Float.valueOf(p.getUnitPrice()), p.OnHand, p.Color, SelectedCustomerNumber, "", p.Visit_Date,p.ACC,
-                                        p.STATUS,p.TAX_CODE,p.TAX_RATE ,p.SEGMENT1 ,p.MAIN_CAT ,p.INVENTORY_ITEM_ID ,p.CREATION_DATE);
+                                        p.STATUS,p.TAX_CODE,p.TAX_RATE ,p.SEGMENT1 ,p.MAIN_CAT ,p.INVENTORY_ITEM_ID ,p.CREATION_DATE,p.Subinventory);
                                         productList.add(product);
                             }
                             RenderList(productList);
@@ -396,7 +405,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                         }
                     } else {
                         //////////////////////////////Online Items///////////////////////////////////////////////////////
-                        new API_Online().SFA_Items_All(getBaseContext(), MainActivity.this, category, txtCustomerNumber.getText().toString(), brand, model, "2"); //order
+                        new API_Online().SFA_Items_All(getBaseContext(), MainActivity.this, category, txtCustomerNumber.getText().toString(), brand, model, "2", SubinventoryID); //order
                         /////////////////////////////////////////////////////////////////////////////////////////////////
                     }
                 } else if (OpenfromDealerOrder == true) {
@@ -404,9 +413,9 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                         productList = new ArrayList<>();
                         if (db_sync.checkifPreorderOfflineisEmpty() == false) {
                             ///////////////////////////Offline Items//////////////////////////////////////////////////
-                            for (Product p : db_sync.getAllPreOrderOffline(SelectedCustomerNumber)) {
+                            for (Product p : db_sync.getAllPreOrderOffline(SelectedCustomerNumber,spinnerSubinventory.getSelectedItem().toString())) {
                                 Product product = new Product(p.SKU, p.Category, p.Brand, p.Model, "", p.Description, p.image, Float.valueOf(p.getUnitPrice()), p.OnHand, p.Color, SelectedCustomerNumber, "", p.Visit_Date,p.ACC,
-                                        p.STATUS,p.TAX_CODE,p.TAX_RATE ,p.SEGMENT1 ,p.MAIN_CAT ,p.INVENTORY_ITEM_ID ,p.CREATION_DATE );
+                                        p.STATUS,p.TAX_CODE,p.TAX_RATE ,p.SEGMENT1 ,p.MAIN_CAT ,p.INVENTORY_ITEM_ID ,p.CREATION_DATE , p.Subinventory);
                                 productList.add(product);
                             }
                             RenderList(productList);
@@ -417,7 +426,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                         //////////////////////////////////////////////////////////////////////////////////////////
                     } else {
                         //////////////////////////////Online Items///////////////////////////////////////////////////////
-                        new API_Online().SFA_Items_All(getBaseContext(), MainActivity.this, category, txtCustomerNumber.getText().toString(), brand, model, "1"); //dealer order
+                        new API_Online().SFA_Items_All(getBaseContext(), MainActivity.this, category, txtCustomerNumber.getText().toString(), brand, model, "1", SubinventoryID); //dealer order
                         /////////////////////////////////////////////////////////////////////////////////////////////////
                     }
                 }
@@ -474,7 +483,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         recyclerView.setVisibility(View.VISIBLE);
         recyclerView.setLayoutManager(new LinearLayoutManager(getBaseContext()));
         if (OpenfromDealerOrder == false) {
-            adapter = new ProductAdapter(productList, getBaseContext(), txtCustomerName.getText().toString(), txtCustomerNumber.getText().toString(), MainActivity.this,OfflineMode);
+            adapter = new ProductAdapter(productList, getBaseContext(), txtCustomerName.getText().toString(), txtCustomerNumber.getText().toString(), MainActivity.this,OfflineMode,spinnerSubinventory.getSelectedItem().toString());
             recyclerView.setAdapter(adapter);
         } else if (OpenfromDealerOrder == true) {
             productDealerAdapter = new ProductDealerAdapter(productList, getBaseContext(), txtCustomerName.getText().toString(), txtCustomerNumber.getText().toString(), MainActivity.this);
@@ -519,6 +528,24 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     }
 
     public void DropDownChanged() {
+        spinnerSubinventory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                try{
+                  if(spinnerSubinventory != null)
+                  {
+                      categorySpinner.GetCategory(LayoutWaitingMainList, spinnerCategory, getBaseContext(), OfflineMode);
+                  }
+                }
+                catch (Exception e)
+                {}
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
         spinnerCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -787,6 +814,13 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         categoryList = new ArrayList<>();
         brandList = new ArrayList<>();
         modelList = new ArrayList<>();
+        SubinventoryList = new ArrayList<>();
+
+        for (Subinventory c : db_sync.getUser_X_Subinventory()) {
+            SubinventoryList.add(c.getSubinventory());
+        }
+
+        spinnerSubinventory.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item,  SubinventoryList));
 
 
         for (Category c : db_sync.getAllCategoryOffline()) {
@@ -813,7 +847,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     }
 
     public void loadingDropDownlistsOnline() {
-        categorySpinner.GetCategory(LayoutWaitingMainList, spinnerCategory, getBaseContext(), OfflineMode);
+        new SubinventorySpinner(getBaseContext()).GetUser_X_Subinventory(LayoutWaitingMainList,spinnerSubinventory,getBaseContext(),OfflineMode,OpenfromOrderPage,OpenfromDealerOrder);
     }
 
     public static void changeTxtConnectionTypeMainActivity(boolean value) {

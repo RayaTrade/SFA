@@ -75,6 +75,8 @@ public class API_Sync_Back {
                 object.put("QtyinStock",product.getQtyinStock());
                 object.put("Discount",product.getDiscount());
                 object.put("UnitPrice" , product.getUnitPrice());
+                object.put("Subinventory" , product.getSubinventory());
+
                 try {
                     Serial_list =(new CollectSerialActivity().List_getSerialsByItemCode(HeaderID,context,product.getItemCode()));
                     Log.d("serials  ", serials + "product.getSKU  " + product.getItemCode());
@@ -168,8 +170,8 @@ public class API_Sync_Back {
                 e.printStackTrace();
             }
 
-            //String url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_SavaOrder_OneBulk";
-            String url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_SavaOrder_OneBulk_PromotionTest";
+            String url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_SavaOrder_OneBulk";
+           // String url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_SavaOrder_OneBulk_PromotionTest";
 
             Log.d("HEADER_URL", url);
 
@@ -186,7 +188,7 @@ public class API_Sync_Back {
 
                     try {
                         String result = Http.ReadResponse(httpResponse);
-
+                         result = "15";
                         if (!result.equals("") || !result.equals(null)) {
                             saved = true;
                             //Headerid = result;
@@ -199,7 +201,7 @@ public class API_Sync_Back {
                                 db_sync.deleteFromTransactionOffline(Integer.valueOf(HeaderIdOffline));
                                 db_sync.deleteFromTransactionItemsOffline(HeaderIdOffline);
 
-                                if(HeaderIdOffline.equals(String.valueOf(countAllheaderList)))
+                             //   if(HeaderIdOffline.equals(String.valueOf(countAllheaderList)))
                                 RenderUI(countAllheaderList,countAllheaderList,SyncType,context,activity,Headerid,HeaderIdOffline,TransactionType);
 
 
@@ -477,7 +479,7 @@ public class API_Sync_Back {
             } else if (TransactionType.equals("2")) {
                 db_sync.deleteFromTransactionSerialsOfflineByHeaderId(HeaderIdOffline);
             }
-            db_sync.deleteFromTransactionItemsOffline(HeaderIdOffline);
+           db_sync.deleteFromTransactionItemsOffline(HeaderIdOffline);
 
             if (SyncType.equals("Update")) {
                 ((SyncBackActivity) activity).RefreshList();

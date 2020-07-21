@@ -68,6 +68,7 @@ public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.SummaryH
         viewHolder.RowCustomer_number = product.Customer_number;
         viewHolder.TxtSummaryproductSKU.setText(product.SKU);
         viewHolder.TxtSummaryproductCategory.setText(product.Category);
+        viewHolder.TxtSummaryProductSubinventory.setText(product.getSubinventory());
         viewHolder.TxSummarytproductQty.setText("Quantity: "+product.QTY);
 
         if( User.Allow_Delivery_Method) {
@@ -89,7 +90,7 @@ public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.SummaryH
             @Override
             public void onClick(View v) {
                 if(OpenfromOrderPage==false)
-                    deleteitemFromPreOrder(product.getSKU(),i,v);
+                    deleteitemFromPreOrder(product.getSKU(),product.getSubinventory(),i,v);
                 else if (OpenfromOrderPage==true)
                     deleteitemFromOrder(product.getSKU(),i,v);
             }
@@ -108,6 +109,7 @@ public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.SummaryH
                 i.putExtra("productQTY",viewHolder.TxSummarytproductQty.getText().toString());
                 i.putExtra("customer_number",viewHolder.RowCustomer_number);
                 i.putExtra("onHand",viewHolder.RowOnHand);
+                i.putExtra("subinventory",product.getSubinventory());
                 i.putExtra("openfromSummary",true);
                 i.putExtra("Order",true);
                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -117,14 +119,16 @@ public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.SummaryH
         });
     }
 
-    public void deleteitemFromPreOrder(final String SKU, final int i, final View view){
+    public void deleteitemFromPreOrder(final String SKU,final String Subinventory , final int i, final View view){
         new AsyncTask<Void, Void, Void>() {
 
             @Override
             protected Void doInBackground(Void... params) {
 
                 context.getContentResolver().delete(ProductContract.ProductEntry.CONTENT_URI,
-                        ProductContract.ProductEntry.COLUMN_PRODUCT_SKU + " = '" + SKU+"'", null);
+                        ProductContract.ProductEntry.COLUMN_PRODUCT_SKU + " = '" + SKU+"' and "
+                        + ProductContract.ProductEntry.COLUMN_PRODUCT_product_Subinventory + " = '"+Subinventory+ "'"
+                        , null);
                 return null;
             }
 
@@ -175,7 +179,7 @@ public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.SummaryH
         return productList.size();
     }
     class SummaryHolder extends RecyclerView.ViewHolder{
-        TextView TxtSummaryproductSKU , TxtSummaryproductCategory,TxSummarytproductQty;
+        TextView TxtSummaryproductSKU , TxtSummaryproductCategory,TxSummarytproductQty,TxtSummaryProductSubinventory;
         ImageView IMGSummaryproduct,Product_warning;
         ImageButton btnDelete;
         String RowSKU;
@@ -193,6 +197,7 @@ public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.SummaryH
             TxtSummaryproductSKU = (TextView) itemView.findViewById(R.id.TxtSummaryProductSKU);
             TxtSummaryproductCategory = (TextView) itemView.findViewById(R.id.TxtSummaryCategory);
             TxSummarytproductQty = (TextView) itemView.findViewById(R.id.TxtSummaryProductQTY);
+            TxtSummaryProductSubinventory = (TextView) itemView.findViewById(R.id.TxtSummaryProductSubinventory);
             IMGSummaryproduct = (ImageView) itemView.findViewById(R.id.IMGSummaryproduct);
             Product_warning = (ImageView) itemView.findViewById(R.id.warning);
             btnDelete = (ImageButton) itemView.findViewById(R.id.btnDelete);

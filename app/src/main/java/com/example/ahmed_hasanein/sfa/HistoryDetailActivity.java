@@ -62,7 +62,7 @@ public class HistoryDetailActivity extends AppCompatActivity {
         db_sync = new SyncDBHelper(getBaseContext());
         preOrderHistoryDetailList = new ArrayList<>();
         for (Items items:db_sync.getAllTransactionItemsOffline(id)) {
-            PreOrderHistoryDetail preOrderHistoryDetail = new PreOrderHistoryDetail(items.getItemCode(),"","","",items.getQty(),"",items.getUnitPrice());
+            PreOrderHistoryDetail preOrderHistoryDetail = new PreOrderHistoryDetail(items.getItemCode(),"","","",items.getQty(),"",items.getUnitPrice(),items.getSubinventory());
             preOrderHistoryDetailList.add(preOrderHistoryDetail);
         }
         recyclerView.setLayoutManager(new LinearLayoutManager(getBaseContext()));
