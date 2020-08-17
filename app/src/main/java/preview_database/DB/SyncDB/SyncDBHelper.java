@@ -47,7 +47,7 @@ public class SyncDBHelper extends SQLiteOpenHelper {
         db.execSQL(
                 "create table LoginOffline " +
                         "(UserID text primary key, ServerConfigID text,Currency text,AllowNegativeQty text,GPSInterval text" +
-                        ",MobileVersion text" +",Allow_Delivery_Method text" +
+                        ",MobileVersion text" +",Allow_Delivery_Method text,Allow_StockTaking text" +
                         ")"
         );
         db.execSQL(
@@ -84,6 +84,29 @@ public class SyncDBHelper extends SQLiteOpenHelper {
 
         db.execSQL(
                 "create table PreOrderOffline " +
+                        "(Id INTEGER PRIMARY KEY AUTOINCREMENT,"+
+                        "ITEM_CODE text, " +
+                        "CAT text," +
+                        "BRAND text," +
+                        "MODEL text," +
+                        "DESCRIPTION text," +
+                        "BrandImage text," +
+                        "ONHAND text," +
+                        "UnitPrice text," +
+                        "COLOR text," +
+                        "ACC text,"+
+                        "STATUS text,"+
+                        "TAX_CODE text,"+
+                        "TAX_RATE text,"+
+                        "SEGMENT1 text,"+
+                        "MAIN_CAT text,"+
+                        "INVENTORY_ITEM_ID text,"+
+                        "CREATION_DATE text,"+
+                        "Subinventory text"+
+                        ")"
+        );
+        db.execSQL(
+                "create table StockTakenItemOffline " +
                         "(Id INTEGER PRIMARY KEY AUTOINCREMENT,"+
                         "ITEM_CODE text, " +
                         "CAT text," +
@@ -302,6 +325,7 @@ public class SyncDBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS Ora_Customers");
         db.execSQL("DROP TABLE IF EXISTS CustomersWithVisitOffline");
         db.execSQL("DROP TABLE IF EXISTS PreOrderOffline");
+        db.execSQL("DROP TABLE IF EXISTS StockTakenItemOffline");
         db.execSQL("DROP TABLE IF EXISTS OrderOffline");
         db.execSQL("DROP TABLE IF EXISTS CategoryOffline");
         db.execSQL("DROP TABLE IF EXISTS BrandOffline");
@@ -1949,7 +1973,7 @@ public void deletepromotion() {
     }
 
     public boolean InsertLoginOffline(String UserID, String ServerConfigID, String Currency, String AllowNegativeQty, String GPSInterval
-            , String MobileVersion,String Allow_Delivery_Method) {
+            , String MobileVersion,String Allow_Delivery_Method,String Allow_StockTaking) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("UserID", UserID);
@@ -1959,6 +1983,7 @@ public void deletepromotion() {
         contentValues.put("GPSInterval", GPSInterval);
         contentValues.put("MobileVersion", MobileVersion);
         contentValues.put("Allow_Delivery_Method", Allow_Delivery_Method);
+        contentValues.put("Allow_StockTaking", Allow_StockTaking);
 
         db.insert("LoginOffline", null, contentValues);
         db.close();//
@@ -1991,6 +2016,7 @@ public void deletepromotion() {
         if (res.moveToFirst()) {
             do {
                  USER.setAllow_Delivery_Method(Boolean.valueOf(res.getString(res.getColumnIndex("Allow_Delivery_Method"))));
+                 USER.setAllow_StockTaking(Boolean.valueOf(res.getString(res.getColumnIndex("Allow_StockTaking"))));
                  USER.setUserID((res.getString(res.getColumnIndex("UserID"))));
             } while (res.moveToNext());
         }
@@ -2225,6 +2251,12 @@ public void deletepromotion() {
         db.close();
         return true;
     }
+   public boolean InsertStockTakenItemOffline(ContentValues contentValues) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.insert("StockTakenItemOffline", null, contentValues);
+        db.close();
+        return true;
+    }
 
     public boolean checkifPreorderOfflineisEmpty() {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -2244,6 +2276,11 @@ public void deletepromotion() {
         db.execSQL("delete from PreOrderOffline");
         db.close();
     }
+    public void deleteAllStockTakenItemOffline() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("delete from StockTakenItemOffline");
+        db.close();
+    }
 
     public String GetUnitPriceForEndUser(final String SKU, final String CustomerNumber) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -2258,15 +2295,71 @@ public void deletepromotion() {
         return result;
     }
 
-    public List<Product>
-
-
-    getAllPreOrderOffline(final String CustomerNumber,String Subinventory) {
+    public List<Product>  getAllPreOrderOffline(final String CustomerNumber,String Subinventory,final  String category,final  String brand,final  String model) {
         List<Product> preorders = new ArrayList<>();
 
         // Select All Query
         String selectQuery = "SELECT  * FROM PreOrderOffline where Subinventory = '"+Subinventory+"'";
+        if(!category.equals("All"))
+            selectQuery+=" and 'CAT ='"+category+"' ";
+        if(!brand.equals("All"))
+            selectQuery+= " and BRAND ='"+brand+"'";
+        if (!model.equals("All"))
+            selectQuery+=" and MODEL ='"+model+"'";
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
 
+        try {
+            // looping through all rows and adding to list
+            if (cursor.moveToFirst()) {
+                do {
+                    Product preorder = new Product();
+                    preorder.setSKU(cursor.getString(cursor.getColumnIndex("ITEM_CODE")));
+                    preorder.setCategory(cursor.getString(cursor.getColumnIndex("CAT")));
+                    preorder.setBrand(cursor.getString(cursor.getColumnIndex("BRAND")));
+                    preorder.setModel(cursor.getString(cursor.getColumnIndex("MODEL")));
+                    preorder.setDescription(cursor.getString(cursor.getColumnIndex("DESCRIPTION")));
+                    preorder.setImage(cursor.getString(cursor.getColumnIndex("BrandImage")));
+                    preorder.setOnHand(cursor.getString(cursor.getColumnIndex("ONHAND")));
+                    preorder.setACC(cursor.getString(cursor.getColumnIndex("ACC")));
+                    preorder.setSTATUS(cursor.getString(cursor.getColumnIndex("STATUS")));
+                    preorder.setTAX_CODE(cursor.getString(cursor.getColumnIndex("TAX_CODE")));
+                    preorder.setTAX_RATE(cursor.getString(cursor.getColumnIndex("TAX_RATE")));
+                    preorder.setSEGMENT1(cursor.getString(cursor.getColumnIndex("SEGMENT1")));
+                    preorder.setMAIN_CAT(cursor.getString(cursor.getColumnIndex("MAIN_CAT")));
+                    preorder.setINVENTORY_ITEM_ID(cursor.getString(cursor.getColumnIndex("INVENTORY_ITEM_ID")));
+                    preorder.setCREATION_DATE(cursor.getString(cursor.getColumnIndex("CREATION_DATE")));
+                    preorder.setSubinventory(cursor.getString(cursor.getColumnIndex("Subinventory")));
+
+                    String UnitPrice = GetUnitPriceForEndUser(preorder.getSKU(), CustomerNumber);
+                    if (UnitPrice != "") {
+                        preorder.setUnitPrice(Float.valueOf(UnitPrice));
+                    }
+                    preorder.setColor(cursor.getString(cursor.getColumnIndex("COLOR")));
+                    preorders.add(preorder);
+                } while (cursor.moveToNext());
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // close db connection
+        db.close();
+
+        // return notes list
+        return preorders;
+    }
+
+    public List<Product> getAllStockTakenItemOffline(final String CustomerNumber,final  String category,final  String brand,final  String model) {
+        List<Product> preorders = new ArrayList<>();
+
+        // Select All Query
+        String selectQuery = "SELECT  * FROM StockTakenItemOffline where CAT ='"+category+"' ";
+        if(!brand.equals("All"))
+            selectQuery+= " and BRAND ='"+brand+"'";
+        if (!model.equals("All"))
+            selectQuery+=" and MODEL ='"+model+"'";
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 

@@ -27,8 +27,11 @@ import Model.User;
 import preview_database.DB.ProductOrderDB.OrderDBHelper;
 import preview_database.DB.SerialDB.SerialDBHelper;
 import preview_database.DB.ProductPreOrderDB.ProductContract;
+import preview_database.DB.StockTakingDB.StockTakingDBHelper;
 
 import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromOrderPage;
+import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromPreOrderPage;
+import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromStockTaken;
 import static com.example.ahmed_hasanein.sfa.MainActivity.SelectedCustomerNumber;
 
 public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.SummaryHolder> {
@@ -36,6 +39,7 @@ public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.SummaryH
     private Context context;
     private OrderDBHelper db_order;
     private SerialDBHelper db_serial;
+    private StockTakingDBHelper db_Stocktaking;
     private  Activity activity;
     public SummaryAdapter(List<Product> productList, Context context, Activity activity) {
         this.productList = productList;
@@ -85,14 +89,21 @@ public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.SummaryH
 //            Picasso.get().load(product.image).error(R.drawable.g_icon).into(viewHolder.IMGSummaryproduct);
 //        }
 
+       if(!product.image.equals(""))
         Picasso.get().load(product.image).error(R.drawable.g_icon).into(viewHolder.IMGSummaryproduct);
+       else
+           Picasso.get().load(R.drawable.g_icon).error(R.drawable.g_icon).into(viewHolder.IMGSummaryproduct);
+
         viewHolder.btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(OpenfromOrderPage==false)
+                if(OpenfromPreOrderPage)
                     deleteitemFromPreOrder(product.getSKU(),product.getSubinventory(),i,v);
                 else if (OpenfromOrderPage==true)
                     deleteitemFromOrder(product.getSKU(),i,v);
+                else if(OpenfromStockTaken){
+                    deleteitemFromSrockTaking(product.getSKU(),i,v);
+                }
             }
         });
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -159,6 +170,27 @@ public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.SummaryH
                 db_serial = new SerialDBHelper(context);
                 db_order.deleteSKU(SKU);
                 db_serial.deleteItemCode(SKU);
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                Toast.makeText(context,"Item Deleted !",Toast.LENGTH_SHORT).show();
+                view.setVisibility(View.INVISIBLE);
+                productList.remove(i);
+                notifyItemRemoved(i);
+                notifyItemRangeChanged(i,productList.size());
+                view.setVisibility(View.VISIBLE);
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+  public void deleteitemFromSrockTaking(final String SKU,final int i,final View view){
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                db_Stocktaking = new StockTakingDBHelper(context);
+                db_Stocktaking.deleteSKU(SKU);
                 return null;
             }
 

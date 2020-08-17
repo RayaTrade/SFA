@@ -20,11 +20,11 @@ public class SubinventorySpinner {
     }
 
     public void GetUser_X_Subinventory(final LinearLayout LayoutWaitingMainList, final Spinner spinner, final Context context, boolean offlineMode,
-                                       boolean OpenfromOrderPage,boolean OpenfromDealerOrder){
+                                       boolean OpenfromPreOrderPage){
         try {
             if(!offlineMode){
 
-                if(!OpenfromOrderPage && !OpenfromDealerOrder)
+                if(OpenfromPreOrderPage)
                     new API_Online().SFA_User_X_Subinventory(LayoutWaitingMainList,spinner,context,"1");
             }
         }catch (Exception e){

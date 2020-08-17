@@ -63,10 +63,13 @@ import CustomerVisitsFragments.CustomerWeekFragment;
 import preview_database.DB.DealerDB.DealerDBHelper;
 import preview_database.DB.ProductOrderDB.OrderDBHelper;
 import preview_database.DB.ProductPreOrderDB.ProductDBHelper;
+import preview_database.DB.StockTakingDB.StockTakingDBHelper;
 import preview_database.DB.SyncDB.SyncDBHelper;
 
 import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromDealerOrder;
 import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromOrderPage;
+import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromPreOrderPage;
+import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromStockTaken;
 import static com.example.ahmed_hasanein.sfa.LoginActivity.OfflineMode;
 
 public class CustomerActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
@@ -79,6 +82,7 @@ public class CustomerActivity extends AppCompatActivity implements SearchView.On
     ProgressBar mProgressBar;
     Bundle extras;
     private ProductDBHelper db;
+    private StockTakingDBHelper db_stock;
     private OrderDBHelper db_order;
     private SyncDBHelper db_sync;
     private DealerDBHelper db_dealer;
@@ -164,21 +168,28 @@ public class CustomerActivity extends AppCompatActivity implements SearchView.On
             if (openfromOrder == true) {
                 AddDearCustomerCardView.setVisibility(View.GONE);
                 TxtCustPageType.setText("Order");
-            } else if (openfromOrder == false && openFromDealerOrder == false) {
+            } else if (OpenfromPreOrderPage == true) {
                 AddDearCustomerCardView.setVisibility(View.GONE);
                 TxtCustPageType.setText("Pre-Order");
             } else if (openFromDealerOrder == true) {
                 TxtCustPageType.setText("Dealer Order");
+            }else if(OpenfromStockTaken == true){
+                AddDearCustomerCardView.setVisibility(View.GONE);
+                TxtCustPageType.setText("Stock Taking");
             }
         } else {
             if (OpenfromOrderPage == true) {
                 AddDearCustomerCardView.setVisibility(View.GONE);
                 TxtCustPageType.setText("Order");
-            } else if (OpenfromOrderPage == false && OpenfromDealerOrder == false) {
+            } else if (OpenfromPreOrderPage == true) {
                 AddDearCustomerCardView.setVisibility(View.GONE);
                 TxtCustPageType.setText("Pre-Order");
             } else if (OpenfromDealerOrder == true) {
                 TxtCustPageType.setText("Dealer Order");
+            }else if(OpenfromStockTaken == true){
+                TxtCustPageType.setText("Stock Taking");
+                AddDearCustomerCardView.setVisibility(View.GONE);
+
             }
         }
 
@@ -229,12 +240,14 @@ public class CustomerActivity extends AppCompatActivity implements SearchView.On
     public void RenderList(List<Customer> customerList, boolean isFragment, RecyclerView recyclerView) {
         txtHintcustomers.setVisibility(View.INVISIBLE);
         this.customerList = customerList;
-        if (OpenfromOrderPage == false && OpenfromDealerOrder == false)
+        if (OpenfromPreOrderPage == true)
             customerList = pendingPreOrderSelectedCustomer(customerList);
         else if (OpenfromOrderPage == true)
             customerList = pendingOrderSelectedCustomer(customerList);
         else if (OpenfromDealerOrder == true)
             customerList = pendingDealerOrderSelectedCustomer(customerList);
+        else if (OpenfromStockTaken == true)
+            customerList = pendingStockTakenSelectedCustomer(customerList);
         ///////////////////////////////////////////////////////////////////////////////////
 
         if (isFragment) {
@@ -424,6 +437,56 @@ public class CustomerActivity extends AppCompatActivity implements SearchView.On
                         customerVisitID = db.getVisitDatePendingPreOrder();
                         customerVisitID = n.Visit_Date;
                         txthintCustomer.setText("You have Pre Order not finished or canceled ! \n Visit Date : " + customerVisitID);
+                        txthintCustomer.setVisibility(View.VISIBLE);
+                    }
+                }
+                String customerName = "";
+                String customerPriceList = "";
+                String customerDueDateFrom = "";
+                String customerDueDateTo = "";
+                String customerScheuleID = "";
+                if (customerNumber != null || !customerNumber.equals("")) {
+                    for (Customer c : customerList) {
+                        if (c.getNumber().equals(customerNumber)) {
+                            customerName = c.Name;
+                            customerPriceList = c.Price_list;
+                            customerDueDateFrom = c.DueDateFrom;
+                            customerDueDateTo = c.DueDateTo;
+                            customerScheuleID = c.ScheuleID;
+                            customerVisitID = c.VisitID;
+                        }
+                    }
+                    if (!customerName.equals("")) {
+                        customer = new Customer(customerNumber, customerName, customerPriceList, customerDueDateFrom, customerDueDateTo, customerScheuleID, customerVisitID);
+                        if (!customerNumber.equals("")) {
+                            PendingcustomerList.add(customer);
+                        }
+                    }
+                }
+            } else {
+                PendingcustomerList = customerList; //no pending customer selected (get normal customer list)
+            }
+        }
+        return PendingcustomerList;
+    }
+
+    public List<Customer> pendingStockTakenSelectedCustomer(List<Customer> customerList) {
+        //check if user make pervious order
+        List<Product> productList;
+        List<Customer> PendingcustomerList = new ArrayList<>();
+        String customerVisitID = "";
+        String customerNumber = "";
+        productList = new ArrayList<>();
+        db_stock = new StockTakingDBHelper(getBaseContext());
+        if (db_stock != null) {
+            productList.addAll(db_stock.getAllStockTaking());
+            if (productList.size() > 0) {
+                for (Product n : productList) {
+                    if (productList != null) {
+                        customerNumber = n.Customer_number;
+                      //  customerVisitID = db_stock.getVisitDatePendingPreOrder();
+                        customerVisitID = n.Visit_Date;
+                        txthintCustomer.setText("You have Stock Taking not finished or canceled ! \n Visit Date : " + customerVisitID);
                         txthintCustomer.setVisibility(View.VISIBLE);
                     }
                 }
@@ -767,5 +830,12 @@ public class CustomerActivity extends AppCompatActivity implements SearchView.On
             finish();
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public void onBackPressed() {
+        // super.onBackPressed();
+        this.finish();
+        return;
     }
 }

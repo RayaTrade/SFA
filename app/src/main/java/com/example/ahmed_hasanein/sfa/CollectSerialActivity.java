@@ -191,7 +191,7 @@ public class CollectSerialActivity extends AppCompatActivity {
         StringOfSerials = "";
         dialogHint = new DialogHint();
 
-        productList.addAll(db_order.getAllOrder());
+        productList.addAll(db_order.getAllOrderTocollectserial());
 
         try {
             serialCustomerName.setText(SelectedCustomerName);
@@ -541,7 +541,7 @@ public class CollectSerialActivity extends AppCompatActivity {
 
     public void RefreshTable() {
         productList = new ArrayList<>();
-        productList.addAll(db_order.getAllOrder());
+        productList.addAll(db_order.getAllOrderTocollectserial());
         adapter = new CollectSerialTableAdapter(productList, getBaseContext(), this);
         recyclerView.setAdapter(adapter);
     }

@@ -86,9 +86,18 @@
             <Button
                 android:id="@+id/clearcache"
                 android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="right"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/clearcache" />
+
+            <TextView
+                android:id="@+id/textView8"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
-                android:text="C" />
+                android:text="Clear Cache"
+                android:textColor="@color/colorWhite" />
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"

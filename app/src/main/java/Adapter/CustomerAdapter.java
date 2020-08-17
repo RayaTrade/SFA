@@ -2,6 +2,7 @@ package Adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,6 +14,7 @@ import Model.Customer;
 import Model.User;
 import Utility.DialogHint;
 
+import com.example.ahmed_hasanein.sfa.MainActivity;
 import com.example.ahmed_hasanein.sfa.R;
 
 import java.util.ArrayList;
@@ -20,6 +22,8 @@ import java.util.List;
 
 import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromDealerOrder;
 import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromOrderPage;
+import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromPreOrderPage;
+import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromStockTaken;
 
 
 public class CustomerAdapter extends RecyclerView.Adapter<CustomerAdapter.CustomerHolder> {
@@ -59,13 +63,34 @@ public class CustomerAdapter extends RecyclerView.Adapter<CustomerAdapter.Custom
                 }
                 new DialogHint().getLocation(activity);
 
-                if(OpenfromOrderPage==false&&OpenfromDealerOrder==false) { //preorder
+                if(OpenfromPreOrderPage == true) { //preorder
                     TransactionType = "1";
                 }else if(OpenfromOrderPage==true){ //order
                     TransactionType = "2";
                 }else if(OpenfromDealerOrder==true){ //dealer
                     TransactionType = "1";
                 }
+                else if(OpenfromStockTaken==true){ //StockTaken
+                    TransactionType = "4";
+                }
+                if(OpenfromStockTaken == true){
+
+                    if( User.Username == null)
+                    {
+                        new DialogHint().Session_End(activity,context);
+                    }
+                    else {
+                        Intent i = new Intent(activity, MainActivity.class);
+                        i.putExtra("customerName", customer.Name);
+                        i.putExtra("customerNumber", customer.Number);
+                        i.putExtra("customerDueDateFrom", customer.DueDateFrom);
+                        i.putExtra("CustomerPrice_list", customer.Price_list);
+                        i.putExtra("firstOpen", true);
+                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        activity.startActivity(i);
+                    }
+                }
+                else
                 new DialogHint().Customer_Visit_Dialog(v,context,activity, User.ServerConfigID,customer.Price_list,customer.Name,customer.Number,customer.DueDateFrom,User.Username);
             }
         });

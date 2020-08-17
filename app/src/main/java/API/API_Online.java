@@ -72,6 +72,7 @@ import preview_database.DB.DealerDB.DealerDBHelper;
 import preview_database.DB.ProductOrderDB.OrderDBHelper;
 import preview_database.DB.SerialDB.SerialDBHelper;
 import preview_database.DB.ProductPreOrderDB.ProductDBHelper;
+import preview_database.DB.StockTakingDB.StockTakingDBHelper;
 import preview_database.DB.SyncDB.SyncDBHelper;
 import settings.Constants;
 
@@ -84,6 +85,7 @@ public class API_Online extends LoginActivity{
     List<PreOrderHistoryDetail> preOrderHistoryDetailList;
     Customer customer;
     private ProductDBHelper db;
+    private StockTakingDBHelper db_Stock;
     private OrderDBHelper db_order;
     private SerialDBHelper db_serial;
     private SyncDBHelper db_sync;
@@ -149,7 +151,7 @@ public class API_Online extends LoginActivity{
 
                             User.FTP_Path =  current.getString("FTP_Path");
                             User.Images_Path =  current.getString("Images_Path");
-                            User.Allow_Delivery_Method =  Boolean.valueOf(current.getString("Allow_Delivery_Method"));
+                            User.Allow_Delivery_Method =  Boolean.parseBoolean(current.getString("Allow_Delivery_Method"));
                             /*
                              * # change date 25/8/2019
                              * © changed by Ahmed Ali
@@ -161,6 +163,7 @@ public class API_Online extends LoginActivity{
                             User.MaxWaitTime = Integer.parseInt(current.getString("MaxWaitTime"));
                             User.FASTEST_LOCATION_INTERVAL = Integer.parseInt(current.getString("FASTEST_LOCATION_INTERVAL"));
                             User.MobileVersion = current.getString("MobileVersion");
+                            User.Allow_StockTaking = Boolean.parseBoolean(current.getString("Allow_StockTaking"));
 
                         }
 
@@ -292,7 +295,7 @@ public class API_Online extends LoginActivity{
 
                                     dialogPermssion.dismiss();
                                     DialogHint dialogHint = new DialogHint();
-                                    dialogHint.Sync_Dialog(context,activity,LastLoginDatepref,User.DeviceID,preOrderPermission,OrderPermission,historyPermission,email);
+                                    dialogHint.Sync_Dialog(context,activity,LastLoginDatepref,User.DeviceID,preOrderPermission,OrderPermission,historyPermission,email,User.Allow_StockTaking);
 
 
                                 } catch (Exception e) {
@@ -301,12 +304,14 @@ public class API_Online extends LoginActivity{
 
                                 //////////////////////////////////////////////////////////////////////////
                             } else {
+                                User.isAllow_StockTaking();
                                 Intent intent = new Intent(context, DashboardActivity.class);
                                 intent.putExtra("lastsyncdate", LastLoginDatepref);
                                 intent.putExtra("DeviceID", User.DeviceID);
                                 intent.putExtra("preOrderPermission", preOrderPermission);
                                 intent.putExtra("OrderPermission", OrderPermission);
                                 intent.putExtra("historyPermission", historyPermission);
+                                intent.putExtra("StockTakenServerPermission", (User.isAllow_StockTaking()));
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 User.Username = email;
                                 dialogPermssion.dismiss();
@@ -355,7 +360,7 @@ public class API_Online extends LoginActivity{
                             result = "All";
                         }
                         categoryList.add(result);
-                  //      LayoutWaitingMainList.setVisibility(View.GONE);
+                       LayoutWaitingMainList.setVisibility(View.GONE);
                     }
 
                 } catch (JSONException e) {
@@ -673,41 +678,7 @@ public class API_Online extends LoginActivity{
         urlTender = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_GetTenderTypes/" + User.ServerConfigID;
 
         urlTender = urlTender.replaceAll(" ", "%20");
-/*
-        new Http().httpGet(urlTender, activity, new Http.RequestCallback() {
-            @Override
-            public void onError(Throwable exception) {
 
-            }
-
-            @Override
-            public void onResponseReceived(HttpResponse httpResponse, String response2) {
-                try {
-                    String response = Http.ReadResponse(httpResponse);
-
-                    JSONObject object = new JSONObject(response);
-                    JSONArray array = object.getJSONArray("SFA_GetTenderTypesResult");
-                    Log.v("TenderTypes_Method",array.toString());
-
-                    TenderList = new ArrayList<>();
-                    for (int i = 0; i < array.length(); i++) {
-                        String result = array.get(i).toString();
-                        TenderList.add(result);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    //Setting adapter to show the items in the spinner
-                    spinner.setAdapter(new ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item, TenderList));
-                    ((SummaryActivity) activity).RemoveLoadingLayout_EnableButton();
-                    Log.v("Tender Type Method",TenderList.toString());
-
-                } catch (Exception e) {
-                    Toast.makeText(context, "Tender Type not available", Toast.LENGTH_LONG).show();
-                }
-            }
-        });*/
         StringRequest TenderRequest = new StringRequest(Request.Method.GET, urlTender, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -766,22 +737,7 @@ public class API_Online extends LoginActivity{
 
                     productList = new ArrayList<>();
                     productList = sfa_items_all.getProducts();
-                    /*for (int i = 0; i < array.length(); i++) {
-                        JSONObject current = array.getJSONObject(i);
-                        String item_code = current.getString("ITEM_CODE");
-                        String category = current.getString("CAT");
-                        String brand = current.getString("BRAND");
-                        String model = current.getString("MODEL");
-                        String description = current.getString("DESCRIPTION");
-                        String image = current.getString("BrandImage");
-                        String ONHAND = current.getString("ONHAND");
-                        String UnitPrice = current.getString("UnitPrice");
-                        String Color = current.getString("COLOR");
-                        String Subinventory = current.getString("Subinventory");
 
-                        Product product = new Product(item_code, category, brand, model, "", description, image, Float.valueOf(UnitPrice), ONHAND, Color, customerNumber, "", "","","","","");
-                        productList.add(product);
-                    }*/
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -798,52 +754,41 @@ public class API_Online extends LoginActivity{
         });
         Volley.newRequestQueue(context).add(productRequest);
 
-     /*
-     new Http().httpGet(url, activity, new Http.RequestCallback() {
-         @Override
-         public void onError(Throwable exception) {
-           //  error.printStackTrace();
-             new DialogHint().showNetworkDialog(activity);
-             Toast.makeText(context, "Get Products Error ! Try Again", Toast.LENGTH_LONG).show();
-         }
+    }
 
-         @Override
-         public void onResponseReceived(HttpResponse httpResponse, String respons) {
+    public void SFA_Ora_StockItems_All(final Context context, final Activity activity, String Category, final String customerNumber, String Brand, String Model, String TransactionType, String subinventoryID) {
+        String url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_Ora_StockItems_All/" + User.ServerConfigID + "/" + customerNumber + "/" + Category + "/" + Brand + "/" + Model + "/" + User.Username + "/" + TransactionType;
 
-             try {
-                 String response = Http.ReadResponse(httpResponse);
+        url = url.replaceAll(" ", "%20");
+        Log.d("PRODUCT_URL", url);
 
-                 JSONObject object = new JSONObject(response);
-                 JSONArray array = object.getJSONArray("SFA_Items_AllResult");
-                 productList = new ArrayList<>();
-                 for (int i = 0; i < array.length(); i++) {
-                     JSONObject current = array.getJSONObject(i);
-                     String item_code = current.getString("ITEM_CODE");
-                     String category = current.getString("CAT");
-                     String brand = current.getString("BRAND");
-                     String model = current.getString("MODEL");
-                     String description = current.getString("DESCRIPTION");
-                     String image = current.getString("BrandImage");
-                     String ONHAND = current.getString("ONHAND");
-                     String UnitPrice = current.getString("UnitPrice");
-                     String Color = current.getString("COLOR");
 
-                     String HEIGHT = current.getString("HEIGHT");
-                     String WEIGHT = current.getString("WEIGHT");
-                     String LENGTH = current.getString("LENGTH");
-                     String WIDTH = current.getString("WIDTH");
+        StringRequest productRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
 
-                     Product product = new Product(item_code, category, brand, model, "", description, image, Float.valueOf(UnitPrice), ONHAND, Color, customerNumber, "", "",LENGTH,WEIGHT,WIDTH,HEIGHT);
-                     productList.add(product);
-                 }
-             } catch (JSONException e) {
-                 e.printStackTrace();
-             }
-             ((MainActivity) activity).RenderList(productList);
+                    SFA_Items_All sfa_items_all = new Gson().fromJson(response,SFA_Items_All.class);
 
-         }
-     });
-   */
+                    productList = new ArrayList<>();
+                    productList = sfa_items_all.getOraproducts();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                ((MainActivity) activity).RenderList(productList);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+                new DialogHint().showNetworkDialog(activity);
+                Toast.makeText(context, "Get Products Error ! Try Again", Toast.LENGTH_LONG).show();
+            }
+
+        });
+        Volley.newRequestQueue(context).add(productRequest);
+
     }
 
     public void SFA_Customers(final RecyclerView recyclerView, final ProgressBar progressBar, final Context context, final Activity activity) {
@@ -1021,7 +966,7 @@ public class API_Online extends LoginActivity{
                         object.put("Discount","0");
                         object.put("UnitPrice" , product.UnitPrice);
                         object.put("Subinventory" , product.Subinventory);
-                if(TransactionType.equals("1")) {
+                if(TransactionType.equals("2")) {
                     try {
                         Serial_list = ((CollectSerialActivity) activity).List_getSerialsByItemCode(HeaderId, context, product.SKU);
                         Log.d("serials  ", serials + "product.getSKU  " + product.SKU);
@@ -1076,6 +1021,9 @@ public class API_Online extends LoginActivity{
             } else if (OpenFrom.equals("dealer")) {
                 db_dealer = new DealerDBHelper(context);
                 productList.addAll(db_dealer.getAllDealerOrder());
+            } else if (OpenFrom.equals("StockTaking")) {
+                db_Stock = new StockTakingDBHelper(context);
+                productList.addAll(db_Stock.getAllStockTaking());
             }
 
             JSONObject object = new JSONObject();
@@ -1115,7 +1063,6 @@ public class API_Online extends LoginActivity{
 
             String url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_SavaOrder_OneBulk";
 
-        // String url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_SavaOrder_OneBulk_PromotionTest";
             Log.d("HEADER_URL", url);
 
             new Http().httpPost(url, String.valueOf(object), new Http.RequestCallback() {

@@ -23,9 +23,11 @@ import com.squareup.picasso.Picasso;
 import Model.Product;
 import preview_database.DB.ProductOrderDB.OrderDBHelper;
 import preview_database.DB.ProductPreOrderDB.ProductContract;
+import preview_database.DB.StockTakingDB.StockTakingDBHelper;
 
 import static Adapter.CustomerAdapter.SelectedCustomerVisitDate;
 import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromOrderPage;
+import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromStockTaken;
 import static com.example.ahmed_hasanein.sfa.LoginActivity.AllowNegativeQtypref;
 import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromOrderPage;
 import static com.example.ahmed_hasanein.sfa.MainActivity.SelectedCustomerNumber;
@@ -76,7 +78,14 @@ public class DetailActivity extends AppCompatActivity {
             TxtModel.setText(extras.getString("productModel"));
             TxtDesc.setText(extras.getString("productDesc"));
             TxtUnitPrice.setText(extras.getString("productPrice"));
-            Picasso.get().load(extras.getString("productImg")).error(R.drawable.g_icon).into(ToolbarimageView);
+
+            if(!extras.getString("productImg").equals(""))
+                Picasso.get().load(extras.getString("productImg")).error(R.drawable.g_icon).into(ToolbarimageView);
+            else
+                Picasso.get().load(R.drawable.g_icon).error(R.drawable.g_icon).into(ToolbarimageView);
+
+
+          //  Picasso.get().load(extras.getString("productImg")).error(R.drawable.g_icon).into(ToolbarimageView);
             TxtQTY.setText(extras.getString("productQTY"));
             TxtCustomerID.setText(extras.getString("customer_number"));
             TxtOnHandDetail.setText(extras.getString("onHand"));
@@ -107,9 +116,13 @@ public class DetailActivity extends AppCompatActivity {
                 .setPositiveButton("Edit", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (Float.valueOf(TxtUnitPrice.getText().toString()) >= 1.0) {
+                        if(OpenfromStockTaken){
+                            add_Edit(taskEditText.getText().toString());
+                        }
+                        else if (Float.valueOf(TxtUnitPrice.getText().toString()) >= 1.0) {
                             int Qty = Integer.parseInt(taskEditText.getText().toString());
-                            if (!taskEditText.getText().toString().isEmpty() && Qty >= 1) {
+
+                             if (!taskEditText.getText().toString().isEmpty() && Qty >= 1) {
 
                                 if (AllowNegativeQtypref.equals("True") || (Qty <= Integer.parseInt(TxtOnHandDetail.getText().toString()) && AllowNegativeQtypref.equals("False"))) {
 
@@ -139,10 +152,29 @@ public class DetailActivity extends AppCompatActivity {
         if (!EditText.isEmpty()) {
             int Qty = Integer.parseInt(EditText);
             float UnitPrice = 0;
-            if (!TxtUnitPrice.getText().toString().equals("") && Qty >= 1) {
+
+            if (OpenfromStockTaken) {
+                mProduct = new Product(TxtSKU.getText().toString(),
+                        TxtCat.getText().toString()
+                        , TxtBrand.getText().toString()
+                        , TxtModel.getText().toString()
+                        , EditText
+                        , TxtDesc.getText().toString()
+                        , imagepath
+                        , UnitPrice
+                        , TxtOnHandDetail.getText().toString()
+                        , ""
+                        , extras.getString("customer_number")
+                        , ""
+                        , SelectedCustomerVisitDate, "", "", "", "", subinventory);
+                AddfromStockTaking(EditText);
+            }
+            else
+            {
+                if (!TxtUnitPrice.getText().toString().equals("") && Qty >= 1) {
                 UnitPrice = Float.parseFloat(TxtUnitPrice.getText().toString());
             }
-            if (AllowNegativeQtypref.equals("True") || (Qty <= Integer.parseInt(TxtOnHandDetail.getText().toString()) && AllowNegativeQtypref.equals("False"))) {
+                if (AllowNegativeQtypref.equals("True") || (Qty <= Integer.parseInt(TxtOnHandDetail.getText().toString()) && AllowNegativeQtypref.equals("False"))) {
                 if (Integer.parseInt(EditText) >= 1) {
                     mProduct = new Product(TxtSKU.getText().toString(),
                             TxtCat.getText().toString()
@@ -156,7 +188,7 @@ public class DetailActivity extends AppCompatActivity {
                             , ""
                             , extras.getString("customer_number")
                             , ""
-                            ,SelectedCustomerVisitDate,"","","","",subinventory);
+                            , SelectedCustomerVisitDate, "", "", "", "", subinventory);
                 }
 
                 if (OpenfromOrderPage == false) {
@@ -166,6 +198,7 @@ public class DetailActivity extends AppCompatActivity {
                 }
             } else {
                 Toast.makeText(getBaseContext(), "Quantity is more than on hand", Toast.LENGTH_LONG).show();
+            }
             }
         } else {
             Toast.makeText(getBaseContext(), "Please enter valid Quantity", Toast.LENGTH_LONG).show();
@@ -284,6 +317,42 @@ public class DetailActivity extends AppCompatActivity {
                 i.putExtra("Order", true);
                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(i);
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    public void AddfromStockTaking(final String Qty){
+        final StockTakingDBHelper stockTakingDBHelper = new StockTakingDBHelper(getBaseContext());
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                if (stockTakingDBHelper.CheckSKUOrder(mProduct.getSKU())==false) {
+                    itemExist= false;
+                    stockTakingDBHelper.insertItemStockTaking(mProduct.getSKU(),mProduct.getCategory(),mProduct.getImage()
+                            ,mProduct.getBrand(),mProduct.getModel(),mProduct.getDescription()
+                            ,mProduct.getQTY(),mProduct.getCustomer_number(),mProduct.getOnHand()
+                            ,mProduct.getUnitPrice(),Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)),mProduct.Visit_Date,mProduct.getSubinventory());
+                }else{
+                    itemExist= true;
+                    stockTakingDBHelper.updateItemOrder(mProduct.getSKU(),mProduct.getQTY(),mProduct.getOnHand()
+                            ,mProduct.getUnitPrice(),Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)));
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                if (itemExist == false) {
+                    Toast.makeText(getBaseContext(), "Item Added !", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getBaseContext(), "Item already exist Quantity updated now !", Toast.LENGTH_SHORT).show();
+                }
+                Intent i = new Intent(getBaseContext(), SummaryActivity.class);
+                i.putExtra("customerNumber", extras.getString("customer_number"));
+                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
+
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }

@@ -243,16 +243,21 @@ public class LoginActivity extends AppCompatActivity {
     ///-------
 
     public void clearApplicationData() {
+        boolean files_deleted = false;
         File cacheDirectory = getCacheDir();
         File applicationDirectory = new File(cacheDirectory.getParent());
         if (applicationDirectory.exists()) {
             String[] fileNames = applicationDirectory.list();
             for (String fileName : fileNames) {
                 if (!fileName.equals("lib")) {
-                    deleteFile(new File(applicationDirectory, fileName));
+                    files_deleted =   deleteFile(new File(applicationDirectory, fileName));
                 }
             }
         }
+       if(files_deleted)
+           Toast.makeText(getBaseContext(),"App Cache Deleted",Toast.LENGTH_SHORT).show();
+       else
+           Toast.makeText(getBaseContext(),"App Cache Deleted Not supported",Toast.LENGTH_SHORT).show();
     }
     public static boolean deleteFile(File file) {
         boolean deletedAll = true;
@@ -355,6 +360,7 @@ public class LoginActivity extends AppCompatActivity {
         intent.putExtra("preOrderPermission", preOrderPermission);
         intent.putExtra("OrderPermission", OrderPermission);
         intent.putExtra("historyPermission", historyPermission);
+        intent.putExtra("StockTakenServerPermission", User.isAllow_StockTaking());
         User.Username = emailpref;
         User.Allow_Delivery_Method = user.isAllow_Delivery_Method();
         startActivity(intent);
@@ -521,6 +527,7 @@ public class LoginActivity extends AppCompatActivity {
                 db_sync.deleteAllCustomersOffline();
                 db_sync.deleteAllCustomersWithVisitOffline();
                 db_sync.deleteAllPreOrderOffline();
+                db_sync.deleteAllStockTakenItemOffline();
                 db_sync.deleteAllOrderOffline();
                 db_sync.deleteAllCategoryOffline();
                 db_sync.deleteAllBrandOffline();
@@ -692,7 +699,7 @@ public class LoginActivity extends AppCompatActivity {
             protected void onPostExecute(String s) {
                 super.onPostExecute(s);
                 pDialog.setProgress(15);
-                pDialog.setMessage("Sync Pre-order items...");
+                pDialog.setMessage("Sync Customer...");
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -766,7 +773,7 @@ public class LoginActivity extends AppCompatActivity {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        SyncPreOrder(ServerConfigIDpref);
+                        SyncStockTaken(ServerConfigIDpref);
                     }
                 }, 5000);
 
@@ -776,6 +783,43 @@ public class LoginActivity extends AppCompatActivity {
         }.execute();
     }
 //5
+    public void SyncStockTaken(final String ServerConfigID) {
+        new AsyncTask<String, Integer, String>() {
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                db_sync.deleteAllStockTakenItemOffline();
+            }
+
+            @Override
+            protected String doInBackground(String... params) {
+
+                db_sync = new SyncDBHelper(getBaseContext());
+
+                apiSyncDB.StockTakenOffline(LoginActivity.this, getBaseContext(), ServerConfigID, "All", "All", "All", "All", emailpref);
+
+                return null;
+
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                pDialog.setProgress(24);
+                pDialog.setMessage("Sync Pre-Order items...");
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        SyncPreOrder(ServerConfigIDpref);
+                    }
+                }, 5000);
+
+            }
+
+
+        }.execute();
+    }
     public void SyncPreOrder(final String ServerConfigID) {
         new AsyncTask<String, Integer, String>() {
 
@@ -813,7 +857,8 @@ public class LoginActivity extends AppCompatActivity {
 
         }.execute();
     }
-//5
+
+    //5
     public void SyncOrder(final String ServerConfigID) {
         new AsyncTask<String, Integer, String>() {
 
@@ -1224,6 +1269,8 @@ public class LoginActivity extends AppCompatActivity {
                        intent.putExtra("preOrderPermission", preOrderPermission);
                        intent.putExtra("OrderPermission", OrderPermission);
                        intent.putExtra("historyPermission", historyPermission);
+                       intent.putExtra("StockTakenServerPermission",(User.isAllow_StockTaking()));
+
                        User.Username = email.getText().toString();
 //                dialog.dismiss();
                        startActivity(intent);

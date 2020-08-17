@@ -27,6 +27,16 @@ public class User {
 
     public static boolean Allow_Delivery_Method;
 
+    public static boolean isAllow_StockTaking() {
+        return Allow_StockTaking;
+    }
+
+    public static void setAllow_StockTaking(boolean allow_StockTaking) {
+        Allow_StockTaking = allow_StockTaking;
+    }
+
+    public static boolean Allow_StockTaking;
+
 
     public static String FTP_Path;
     public static String Images_Path;

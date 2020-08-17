@@ -76,10 +76,13 @@ import preview_database.DB.DealerDB.DealerDBHelper;
 import preview_database.DB.ProductOrderDB.OrderDBHelper;
 import preview_database.DB.SerialDB.SerialDBHelper;
 import preview_database.DB.ProductPreOrderDB.ProductDBHelper;
+import preview_database.DB.StockTakingDB.StockTakingDBHelper;
 import preview_database.DB.SyncDB.SyncDBHelper;
 
 import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromDealerOrder;
 import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromOrderPage;
+import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromPreOrderPage;
+import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromStockTaken;
 import static com.example.ahmed_hasanein.sfa.LoginActivity.OfflineMode;
 import static com.example.ahmed_hasanein.sfa.LoginActivity.ServerConfigIDpref;
 import static com.example.ahmed_hasanein.sfa.LoginActivity.emailpref;
@@ -99,6 +102,7 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
     CardView delivery_layout;
     static TextView TxtSummConnectionType;
     private ProductDBHelper db;
+    private StockTakingDBHelper db_Stock;
     private OrderDBHelper db_order;
     private SerialDBHelper db_serial;
     private SyncDBHelper db_sync;
@@ -339,7 +343,7 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
 
    static ProgressDialog  Prodialog;
     public void Fillitem() {
-        if (OpenfromOrderPage == false && OpenfromDealerOrder == false) { //preorder
+        if (OpenfromPreOrderPage) { //preorder
             db = new ProductDBHelper(this);
             productList.addAll(db.getAllProduct());
             delivery_layout.setVisibility(View.VISIBLE);
@@ -363,7 +367,11 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
                 delivery_layout.setVisibility(View.GONE);
             }
 
-        } else if (OpenfromOrderPage == true) { //order
+        } else if (OpenfromStockTaken == true) { // Stock Taking
+            db_Stock = new StockTakingDBHelper(this);
+            productList.addAll(db_Stock.getAllStockTaking());
+            delivery_layout.setVisibility(View.GONE);
+        }else if (OpenfromOrderPage == true) { //order
             db_order = new OrderDBHelper(this);
             db_serial = new SerialDBHelper(this);
             productList.addAll(db_order.getAllOrder());
@@ -383,10 +391,11 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
                 if (productList.size() <= 0) {
                     txtHintsummary.setVisibility(View.VISIBLE);
                 }
-                if(User.Allow_Delivery_Method)
+
+                /* if(User.Allow_Delivery_Method)
                 delivery_layout.setVisibility( View.VISIBLE);
                 else
-                delivery_layout.setVisibility(View.GONE);
+                delivery_layout.setVisibility(View.GONE);*/
 
                 mProgressBar.setVisibility(View.GONE);
                 if(Prodialog != null && Prodialog.isShowing())
@@ -443,6 +452,11 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
         DialogFinsih.setView(view);
         dialogbtnFinsih.setEnabled(false);
         dialog = DialogFinsih.create();
+        if(OpenfromStockTaken)
+        {
+            spinnerDeliveryMethods.setVisibility(View.GONE);
+            spinnerTenderType.setVisibility(View.GONE);
+        }
         dialog.show();
     }
 
@@ -471,6 +485,7 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
             deliveryMethodsSpinner = new DeliveryMethodsSpinner(getBaseContext());
 
             // open dialog
+
             initiateDialog();
             loadingDropDownlists();
 
@@ -491,7 +506,7 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
                         return;
                     }
 
-                    if(spinnerTenderType == null && spinnerTenderType.getSelectedItem() ==null ) {
+                    if( (spinnerTenderType == null && spinnerTenderType.getSelectedItem() ==null) && !OpenfromStockTaken ) {
                         TextView errorText = (TextView)spinnerTenderType.getSelectedView();
                         errorText.setError("");
                         errorText.setTextColor(Color.RED);//just to highlight that this is an error
@@ -499,7 +514,7 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
                         return;
                     }
 
-                    if(spinnerDeliveryMethods == null && spinnerDeliveryMethods.getSelectedItem() ==null ) {
+                    if( (spinnerDeliveryMethods == null && spinnerDeliveryMethods.getSelectedItem() ==null) && !OpenfromStockTaken ) {
                         TextView errorText = (TextView)spinnerDeliveryMethods.getSelectedView();
                         errorText.setError("");
                         errorText.setTextColor(Color.RED);//just to highlight that this is an error
@@ -562,7 +577,11 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
                 total += Float.valueOf(product.Total);
             }
 
+            if(OpenfromPreOrderPage)
             Headerid = String.valueOf(db_sync.InsertTransactionsOffline(ServerConfigIDpref, SelectedCustomerNumber, SelectedCustomerName,emailpref, Long, Lat, TxtComment.getText().toString(), spinnerDeliveryMethods.getSelectedItem().toString(), "1", String.valueOf(total)));
+            else if(OpenfromStockTaken)
+            Headerid = String.valueOf(db_sync.InsertTransactionsOffline(ServerConfigIDpref, SelectedCustomerNumber, SelectedCustomerName,emailpref, Long, Lat, TxtComment.getText().toString(), spinnerDeliveryMethods.getSelectedItem().toString(), "4", String.valueOf(total)));
+
             db_sync.InsertTransactionTenderOffline(Headerid, spinnerTenderType.getSelectedItem().toString(), emailpref, String.valueOf(total));
 
             for (Product product : productList) {
@@ -607,7 +626,10 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
             startActivity(i);
             finish();
             try {
+                if(OpenfromPreOrderPage)
                 db.deleteAll();
+                else if(OpenfromStockTaken)
+                    db_Stock.deleteAllStockTaking();
             } catch (Exception e) {
                 dialogSave.dismiss();
                 Toast.makeText(getBaseContext(), "please Delete your orders manual !", Toast.LENGTH_LONG).show();
@@ -618,17 +640,17 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
     public void OnlineSave() {
         dialog.dismiss();
 
-        if ((!spinnerDeliveryMethods.getSelectedItem().toString().equals("Delivery Method List Loading...") || !spinnerDeliveryMethods.getSelectedItem().toString().equals("") || spinnerDeliveryMethods != null)
-                && (!spinnerTenderType.getSelectedItem().toString().equals("Tender Type List Loading......") || !spinnerTenderType.getSelectedItem().toString().equals("") || spinnerTenderType != null)) {
+        if ( ((!spinnerDeliveryMethods.getSelectedItem().toString().equals("Delivery Method List Loading...") || !spinnerDeliveryMethods.getSelectedItem().toString().equals("") || spinnerDeliveryMethods != null)
+                && (!spinnerTenderType.getSelectedItem().toString().equals("Tender Type List Loading......") || !spinnerTenderType.getSelectedItem().toString().equals("") || spinnerTenderType != null) ) || OpenfromStockTaken ) {
             dialogSave = ProgressDialog.show(SummaryActivity.this, "",
                     "Saving. Please wait...", true);
             new Handler().postDelayed(new Runnable() {
                 public void run() {
                     try {
-                       // new API_Online().SavePreOrderHeader(getApplicationContext(), SummaryActivity.this, dialogSave, "preorder", User.ServerConfigID, SummaryCustomerNumber.getText().toString(), User.Username, Long, Lat, TxtComment.getText().toString(), spinnerDeliveryMethods.getSelectedItem().toString(), spinnerTenderType.getSelectedItem().toString(), "1", "Online");
-                       // new API_Online().SavePreOrderHeader(getApplicationContext(), SummaryActivity.this, dialogSave, "preorder", User.ServerConfigID, SummaryCustomerNumber.getText().toString(), User.Username, Long, Lat, TxtComment.getText().toString(), spinnerDeliveryMethods.getSelectedItem().toString(), spinnerTenderType.getSelectedItem().toString(), "1", "Online");
-                       new API_Online().SFA_SavaOrder_OneBulk(getApplicationContext(), SummaryActivity.this, dialogSave, "preorder", User.ServerConfigID, SelectedCustomerName,SummaryCustomerNumber.getText().toString(), User.Username, Long, Lat, TxtComment.getText().toString(), spinnerDeliveryMethods.getSelectedItem().toString(), spinnerTenderType.getSelectedItem().toString(), "1", "Online");
-
+                  if(OpenfromPreOrderPage)
+                   new API_Online().SFA_SavaOrder_OneBulk(getApplicationContext(), SummaryActivity.this, dialogSave, "preorder", User.ServerConfigID, SelectedCustomerName,SummaryCustomerNumber.getText().toString(), User.Username, Long, Lat, TxtComment.getText().toString(), spinnerDeliveryMethods.getSelectedItem().toString(), spinnerTenderType.getSelectedItem().toString(), "1", "Online");
+                  else if(OpenfromStockTaken)
+                      new API_Online().SFA_SavaOrder_OneBulk(getApplicationContext(), SummaryActivity.this, dialogSave, "StockTaking", User.ServerConfigID, SelectedCustomerName,SummaryCustomerNumber.getText().toString(), User.Username, Long, Lat, TxtComment.getText().toString(), "No Delivery Methods", "No Tender Type", "4", "Online");
 
                     } catch (Exception e) {
                         dialogSave.dismiss();
@@ -637,7 +659,8 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
                     }
                 }
             }, 4000);
-        } else {
+        }
+        else {
             Toast.makeText(getBaseContext(), "Check Your Internet Connection", Toast.LENGTH_SHORT).show();
         }
     }
@@ -699,8 +722,10 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
             alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            if ((OpenfromOrderPage == false || openfromOrder == false) && OpenfromDealerOrder == false) {
+                            if (OpenfromPreOrderPage) {
                                 db.deleteAll();
+                            } else if (OpenfromStockTaken) {
+                                db_Stock.deleteAllStockTaking();
                             } else if (OpenfromOrderPage == true) {
                                 db_order.deleteAll();
                                 db_serial.deleteAll();

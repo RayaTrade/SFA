@@ -60,7 +60,7 @@ public class API_Sync_Back {
     public static    ProductDimension[] productDimensions;
     public static SFA_GetTruckType Trucks;
 
-    private JSONArray Convert_Array_to_Json_to (String HeaderID,Context context,String HeaderIdOffline,List<Items> productList)
+    private JSONArray Convert_Array_to_Json_to (String HeaderID,Context context,String HeaderIdOffline,List<Items> productList,String TransactionType)
     {
         JSONArray array = new JSONArray();
         ArrayList<String> Serial_list = new ArrayList<>();
@@ -76,12 +76,13 @@ public class API_Sync_Back {
                 object.put("Discount",product.getDiscount());
                 object.put("UnitPrice" , product.getUnitPrice());
                 object.put("Subinventory" , product.getSubinventory());
+                if(TransactionType.equals("2")) {
+                    try {
+                        Serial_list = (new CollectSerialActivity().List_getSerialsByItemCode(HeaderID, context, product.getItemCode()));
+                        Log.d("serials  ", serials + "product.getSKU  " + product.getItemCode());
+                    } catch (Exception e) {
 
-                try {
-                    Serial_list =(new CollectSerialActivity().List_getSerialsByItemCode(HeaderID,context,product.getItemCode()));
-                    Log.d("serials  ", serials + "product.getSKU  " + product.getItemCode());
-                }catch (Exception e){
-
+                    }
                 }
 
 
@@ -148,7 +149,7 @@ public class API_Sync_Back {
                 object.accumulate("TransactionType", TransactionType);
                 object.accumulate("OfflineID", HeaderIdOffline);
                 object.accumulate("HeaderID", "");
-                object.accumulate("Product_List", Convert_Array_to_Json_to(HeaderIdOffline,context,HeaderIdOffline, itemsList));
+                object.accumulate("Product_List", Convert_Array_to_Json_to(HeaderIdOffline,context,HeaderIdOffline, itemsList,TransactionType));
                 object.accumulate("OpenFrom", "Offline to Online");
                 object.accumulate("TenderType", (db_sync.getAllTransactionTenderOffline(HeaderIdOffline).size() > 0 )?db_sync.getAllTransactionTenderOffline(HeaderIdOffline).get(0).getTenderType() :"back to sales");
                 object.accumulate("Amount", String.valueOf(Calcualte_Amount(itemsList)));

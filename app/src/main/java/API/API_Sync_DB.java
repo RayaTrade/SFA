@@ -44,7 +44,7 @@ import Model.Subinventory;
 public class API_Sync_DB {
     public SyncDBHelper db_sync;
     public SerialDBHelper db_serial;
-    String Allow_Delivery_Method,AllowNegativeQty,Currency,GPSInterval,MobileVersion,ServerConfigID,UserID,MenuID,Customernumber,item_code_preOrder,item_code_order;
+    String Allow_Delivery_Method,AllowNegativeQty,Allow_StockTaking,Currency,GPSInterval,MobileVersion,ServerConfigID,UserID,MenuID,Customernumber,item_code_preOrder,item_code_order;
     boolean checklogin = true;
     boolean checkpermssion;
     boolean checkcustomer;
@@ -82,6 +82,7 @@ public class API_Sync_DB {
                         ServerConfigID = current.getString("ServerConfigID");
                         UserID = current.getString("UserID");
                         Allow_Delivery_Method = current.getString("Allow_Delivery_Method");
+                        Allow_StockTaking = current.getString("Allow_StockTaking");
                     }
                     if(UserID!=""){
                         checklogin = true;
@@ -89,7 +90,7 @@ public class API_Sync_DB {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                db_sync.InsertLoginOffline(UserID,ServerConfigID,Currency,AllowNegativeQty,GPSInterval,MobileVersion,Allow_Delivery_Method);
+                db_sync.InsertLoginOffline(UserID,ServerConfigID,Currency,AllowNegativeQty,GPSInterval,MobileVersion,Allow_Delivery_Method,Allow_StockTaking);
 //                try {
 //                    ((SyncActivity)activity).changeLoginImagetoTrue();
 //                }catch (Exception e){
@@ -342,6 +343,63 @@ public class API_Sync_DB {
                         contentValues.put("Subinventory", current.getString("Subinventory"));
 
                         db_sync.InsertPreOrderOffline(contentValues);
+                       // db_sync.InsertPreOrderOffline(item_code_preOrder,category,brand,model,description,image,ONHAND,UnitPrice,Color);
+                        if(item_code_preOrder!=""){
+                            checkpreorder = true;
+                        }
+                    }
+
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                checkpreorder=false;
+            }
+
+        });
+        Volley.newRequestQueue(context).add(preorderRequest);
+        return checkpreorder;
+    }
+
+    public boolean StockTakenOffline(final Activity activity,final Context context,String ServerConfigID,String customerNumber,String Category,String Brand,String Model,String UserName){
+        db_sync = new SyncDBHelper(context);
+        String url_preOrder = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_Ora_StockItems_All/"+ServerConfigID+"/"+customerNumber+"/"+Category+"/"+Brand+"/"+Model+"/"+UserName+"/"+"3";
+
+        StringRequest preorderRequest = new StringRequest(Request.Method.GET, url_preOrder, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject object = new JSONObject(response);
+                    JSONArray array = object.getJSONArray("SFA_Ora_StockItems_AllResult");
+
+                    for(int i=0;i<array.length();i++){
+                        JSONObject current = array.getJSONObject(i);
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put("ITEM_CODE", current.getString("ITEM_CODE"));
+                        contentValues.put("CAT", current.getString("CAT"));
+                        contentValues.put("BRAND", current.getString("BRAND"));
+                        contentValues.put("MODEL", current.getString("MODEL"));
+                        contentValues.put("DESCRIPTION", current.getString("DESCRIPTION"));
+                        contentValues.put("BrandImage", current.getString("BrandImage"));
+                        contentValues.put("ONHAND", current.getString("ONHAND"));
+                        contentValues.put("UnitPrice", current.getString("UnitPrice"));
+                        contentValues.put("ACC", current.getString("ACC"));
+                        contentValues.put("STATUS", current.getString("STATUS"));
+                        contentValues.put("COLOR", current.getString("COLOR"));
+                        contentValues.put("TAX_CODE", current.getString("TAX_CODE"));
+                        contentValues.put("TAX_RATE", current.getString("TAX_RATE"));
+                        contentValues.put("SEGMENT1", current.getString("SEGMENT1"));
+                        contentValues.put("MAIN_CAT", current.getString("MAIN_CAT"));
+                        contentValues.put("INVENTORY_ITEM_ID", current.getString("INVENTORY_ITEM_ID"));
+                        contentValues.put("CREATION_DATE", current.getString("CREATION_DATE"));
+                        contentValues.put("Subinventory", current.getString("Subinventory"));
+
+                        db_sync.InsertStockTakenItemOffline(contentValues);
                        // db_sync.InsertPreOrderOffline(item_code_preOrder,category,brand,model,description,image,ONHAND,UnitPrice,Color);
                         if(item_code_preOrder!=""){
                             checkpreorder = true;

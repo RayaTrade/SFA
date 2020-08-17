@@ -32,14 +32,17 @@ import static com.example.ahmed_hasanein.sfa.LoginActivity.OfflineMode;
 
 public class DashboardActivity extends AppCompatActivity {
     Bundle extras;
-    CardView preOrderCardView, HistoryCardView, OrderCardView, DealersCardView;
+    CardView preOrderCardView, HistoryCardView, OrderCardView, DealersCardView,StockTakenCardView;
     boolean preOrderPermission;
     boolean OrderPermission;
     boolean historyPermission;
+    boolean StockTakenServerPermission;
     String lastsyncdate;
     TextView txtVNumberDashboard, Txt_OfflineTransaction_notification;
     public static boolean OpenfromOrderPage = false;
+    public static boolean OpenfromPreOrderPage = false;
     public static boolean OpenfromDealerOrder = false;
+    public static boolean OpenfromStockTaken = false;
     SyncDBHelper db_sync;
     public static ProgressDialog dialogSync;
     Connectivity connectivity;
@@ -56,6 +59,7 @@ public class DashboardActivity extends AppCompatActivity {
         HistoryCardView = (CardView) findViewById(R.id.HistoryCardView);
         txtVNumberDashboard = (TextView) findViewById(R.id.txtVNumberDashboard);
         OrderCardView = (CardView) findViewById(R.id.OrderCardView);
+        StockTakenCardView = (CardView) findViewById(R.id.StockTakenCardView);
         Txt_OfflineTransaction_notification = (TextView) findViewById(R.id.Txt_OfflineTransaction_notification);
 
         txtVNumberDashboard.setText("Version " + BuildConfig.VERSION_NAME + "," + BuildConfig.VERSION_CODE); //set textview for version number
@@ -66,6 +70,7 @@ public class DashboardActivity extends AppCompatActivity {
             preOrderPermission = extras.getBoolean("preOrderPermission");
             OrderPermission = extras.getBoolean("OrderPermission");
             historyPermission = extras.getBoolean("historyPermission");
+            StockTakenServerPermission = extras.getBoolean("StockTakenServerPermission");
             if (preOrderPermission) {
                 preOrderCardView.setVisibility(View.VISIBLE);
             }
@@ -74,6 +79,10 @@ public class DashboardActivity extends AppCompatActivity {
             }
             if (OrderPermission) {
                 OrderCardView.setVisibility(View.VISIBLE);
+            }
+            if(StockTakenServerPermission)
+            {
+                StockTakenCardView.setVisibility(View.VISIBLE);
             }
         }
 
@@ -184,6 +193,8 @@ public class DashboardActivity extends AppCompatActivity {
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             OpenfromOrderPage = false;
             OpenfromDealerOrder = false;
+            OpenfromStockTaken = false;
+            OpenfromPreOrderPage = true;
             startActivity(i);
         }
 
@@ -220,7 +231,23 @@ public class DashboardActivity extends AppCompatActivity {
             i.putExtra("Order", true);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             OpenfromOrderPage = true;
+            OpenfromStockTaken = false;
+            OpenfromPreOrderPage = false;
             OpenfromDealerOrder = false;
+            startActivity(i);
+        }
+    }
+
+    public void StockTakenClicked(View view) {
+        if (extras != null) {
+            Intent i = new Intent(DashboardActivity.this, CustomerActivity.class);
+            i.putExtra("Order", false);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            OpenfromOrderPage = false;
+            OpenfromPreOrderPage = false;
+            OpenfromDealerOrder = false;
+            OpenfromStockTaken = true;
+
             startActivity(i);
         }
     }

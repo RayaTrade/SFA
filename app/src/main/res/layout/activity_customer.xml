@@ -219,7 +219,7 @@
                     android:layout_height="35dp"
                     android:layout_weight="90"
                     android:ems="10"
-                    android:hint="Filter by customer name"
+                    android:hint="Filter by customer name or number"
                     android:inputType="textPersonName"
                     android:textSize="12sp" />
 

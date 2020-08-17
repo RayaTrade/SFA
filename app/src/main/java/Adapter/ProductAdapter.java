@@ -25,6 +25,7 @@ import com.example.ahmed_hasanein.sfa.DetailActivity;
 import Model.Product;
 import preview_database.DB.ProductOrderDB.OrderDBHelper;
 import preview_database.DB.ProductPreOrderDB.ProductContract;
+import preview_database.DB.StockTakingDB.StockTakingDBHelper;
 import preview_database.DB.SyncDB.SyncDBHelper;
 
 import com.example.ahmed_hasanein.sfa.MainActivity;
@@ -36,6 +37,8 @@ import java.util.List;
 
 import static Adapter.CustomerAdapter.SelectedCustomerVisitDate;
 import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromOrderPage;
+import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromPreOrderPage;
+import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromStockTaken;
 import static com.example.ahmed_hasanein.sfa.LoginActivity.AllowNegativeQtypref;
 import static com.example.ahmed_hasanein.sfa.MainActivity.CustomerPrice_list;
 
@@ -95,9 +98,15 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
         viewHolder.TxtProductDesc.setText(product.Description);
         viewHolder.onhandlbl.setText(product.OnHand);
         viewHolder.colorlbl.setText(product.Color);
+        viewHolder.subinventory.setText(product.getSubinventory());
         if(!product.image.equals("")){
             Picasso.get().load(product.image).error(R.drawable.g_icon).into(viewHolder.IMGproduct);
         }
+        if(OpenfromStockTaken){
+            viewHolder.totalpricelbl.setVisibility(View.GONE);
+        }
+        else
+            viewHolder.totalpricelbl.setVisibility(View.VISIBLE);
 
         viewHolder.EditMain_Qty.addTextChangedListener(new TextWatcher() {
             @Override
@@ -107,21 +116,22 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(viewHolder.EditMain_Qty.length()>0&&viewHolder.EditMain_Qty!=null) {
-                    int Qty = Integer.parseInt(viewHolder.EditMain_Qty.getText().toString());
-                    prefs = context.getSharedPreferences("login_data", context.MODE_PRIVATE);
-                    AllowNegativeQtypref = prefs.getString("My_AllowNegativeQty", "");
-                    if (viewHolder.EditMain_Qty != null && viewHolder.EditMain_Qty.length() > 0) {
-                        float result = viewHolder.RowUnitPrice * Qty;
-                        viewHolder.totalpricelbl.setText(Float.toString(result));
-                        if (!AllowNegativeQtypref.equals("True")||!(Qty <= Integer.parseInt(viewHolder.EditMain_Qty.getText().toString()) &&AllowNegativeQtypref.equals("False"))) {
-                            viewHolder.EditMain_Qty.setTextColor(Color.RED);
+                if(!OpenfromStockTaken) {
+                    if (viewHolder.EditMain_Qty.length() > 0 && viewHolder.EditMain_Qty != null) {
+                        int Qty = Integer.parseInt(viewHolder.EditMain_Qty.getText().toString());
+                        prefs = context.getSharedPreferences("login_data", context.MODE_PRIVATE);
+                        AllowNegativeQtypref = prefs.getString("My_AllowNegativeQty", "");
+                        if (viewHolder.EditMain_Qty != null && viewHolder.EditMain_Qty.length() > 0) {
+                            float result = viewHolder.RowUnitPrice * Qty;
+                            viewHolder.totalpricelbl.setText(Float.toString(result));
+                            if (!AllowNegativeQtypref.equals("True") || !(Qty <= Integer.parseInt(viewHolder.EditMain_Qty.getText().toString()) && AllowNegativeQtypref.equals("False"))) {
+                                viewHolder.EditMain_Qty.setTextColor(Color.RED);
+                            }
                         }
+                    } else {
+                        viewHolder.totalpricelbl.setText("Total Price");
                     }
-                } else{
-                    viewHolder.totalpricelbl.setText("Total Price");
                 }
-
             }
 
             @Override
@@ -133,7 +143,27 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
         viewHolder.AddQTY.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    if (viewHolder.EditMain_Qty.length() > 0 && viewHolder.EditMain_Qty != null) {
+
+                   if(OpenfromStockTaken){
+                       int Qty = Integer.parseInt(viewHolder.EditMain_Qty.getText().toString());
+                       btnAddItem(viewHolder.EditMain_Qty.getText().toString(), i,
+                               viewHolder.RowSKU,
+                               viewHolder.RowCategory,
+                               viewHolder.RowBrand,
+                               viewHolder.RowModel,
+                               viewHolder.RowDescription,
+                               viewHolder.Rowimage,
+                               viewHolder.RowUnitPrice,
+                               viewHolder.RowOnHand,
+                               viewHolder.RowColor,
+                               viewHolder.RowCustomer_number,
+                               SelectedCustomerVisitDate,
+                               Subinventory
+                       );
+                       viewHolder.EditMain_Qty.setText("");
+                       closeKeyboard();
+                   }
+                    else if (viewHolder.EditMain_Qty.length() > 0 && viewHolder.EditMain_Qty != null) {
                         int Qty = Integer.parseInt(viewHolder.EditMain_Qty.getText().toString());
 
                         if ((Qty <= Integer.parseInt(viewHolder.RowOnHand) && AllowNegativeQtypref.equals("False")) || AllowNegativeQtypref.equals("True")) {
@@ -149,7 +179,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
                                     viewHolder.RowColor,
                                     viewHolder.RowCustomer_number,
                                     SelectedCustomerVisitDate,
-                                    Subinventory
+                                    viewHolder.subinventory.getText().toString()
                                     );
                             viewHolder.EditMain_Qty.setText("");
                             closeKeyboard();
@@ -197,7 +227,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
         return productList.size();
     }
     class ProductHolder extends RecyclerView.ViewHolder{
-        TextView TxtproductSKU ,TxtProductDesc,onhandlbl,colorlbl,totalpricelbl;
+        TextView TxtproductSKU ,TxtProductDesc,onhandlbl,colorlbl,totalpricelbl,subinventory;
         EditText EditMain_Qty;
         ImageView IMGproduct;
         ImageView AddQTY;
@@ -221,14 +251,33 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
             onhandlbl = (TextView) itemView.findViewById(R.id.onhandlbl);
             colorlbl= (TextView) itemView.findViewById(R.id.colorlbl);
             totalpricelbl = (TextView) itemView.findViewById(R.id.totalpricelbl);
+            subinventory = (TextView) itemView.findViewById(R.id.subinventory);
         }
     }
 
     public void btnAddItem(final String Qty, final int position,
                            String SKU,String Category,String Brand,String Model,String Description,String image,float UnitPrice,String OnHand,String Color,String Customer_number,String Visit_Date,String subinventory){
 
+
         if(!Qty.isEmpty()){
-            if(Integer.parseInt(Qty)>=1){
+            if(OpenfromStockTaken)
+            {
+                mProduct = new Product(SKU,
+                        Category
+                        ,Brand
+                        ,Model
+                        ,Qty
+                        ,Description
+                        ,image
+                        ,UnitPrice
+                        ,OnHand
+                        ,Color
+                        ,Customer_number,
+                        ""
+                        ,Visit_Date,"","","","",subinventory);
+                AddfromStockTaking(Qty,position);
+            }
+            else if(Integer.parseInt(Qty)>=1) {
                 mProduct = new Product(SKU,
                         Category
                         ,Brand
@@ -243,7 +292,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
                         ""
                         ,Visit_Date,"","","","",subinventory);
 
-                if(OpenfromOrderPage==false) {
+                if(OpenfromPreOrderPage == true) {
                     AddfromPreOrder(Qty, position);
                 }else if(OpenfromOrderPage==true){
                     AddfromOrder(Qty,position);
@@ -354,6 +403,43 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
                 }else{
                     itemExist= true;
                     db_order.updateItemOrder(mProduct.getSKU(),mProduct.getQTY(),mProduct.getOnHand()
+                            ,mProduct.getUnitPrice(),Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)));
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                if(itemExist==false) {
+                    Toast.makeText(context, "Item Added !", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(context, "Item already exist Quantity updated now !", Toast.LENGTH_SHORT).show();
+                }
+
+                productList.remove(position);
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position,productList.size());
+                ((MainActivity)activity).RefreshBottomSheetTable();
+
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    public void AddfromStockTaking(final String Qty , final int position){
+        final StockTakingDBHelper stockTakingDBHelper = new StockTakingDBHelper(context);
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                if (stockTakingDBHelper.CheckSKUOrder(mProduct.getSKU())==false) {
+                    itemExist= false;
+                    stockTakingDBHelper.insertItemStockTaking(mProduct.getSKU(),mProduct.getCategory(),mProduct.getImage()
+                            ,mProduct.getBrand(),mProduct.getModel(),mProduct.getDescription()
+                            ,mProduct.getQTY(),mProduct.getCustomer_number(),mProduct.getOnHand()
+                            ,mProduct.getUnitPrice(),Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)),mProduct.Visit_Date,mProduct.getSubinventory());
+                }else{
+                    itemExist= true;
+                    stockTakingDBHelper.updateItemOrder(mProduct.getSKU(),mProduct.getQTY(),mProduct.getOnHand()
                             ,mProduct.getUnitPrice(),Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)));
                 }
                 return null;

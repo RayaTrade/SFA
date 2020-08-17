@@ -78,7 +78,7 @@ public class DialogHint {
         dialog.show();
     }
 
-    public void Sync_Dialog(final Context context, final Activity activity, final String LastLoginDatepref,final String DeviceID,final boolean preOrderPermission,final boolean OrderPermission,final boolean historyPermission,final String email) {
+    public void Sync_Dialog(final Context context, final Activity activity, final String LastLoginDatepref, final String DeviceID, final boolean preOrderPermission, final boolean OrderPermission, final boolean historyPermission, final String email, final boolean allow_StockTaking) {
        final Dialog dialog =   new Dialog((activity));
         dialog.setContentView(R.layout.warning_dialog);
 
@@ -111,6 +111,7 @@ public class DialogHint {
                 intent.putExtra("preOrderPermission", preOrderPermission);
                 intent.putExtra("OrderPermission", OrderPermission);
                 intent.putExtra("historyPermission", historyPermission);
+                intent.putExtra("StockTakenServerPermission", (allow_StockTaking));
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 User.Username = email;
                 context.startActivity(intent);

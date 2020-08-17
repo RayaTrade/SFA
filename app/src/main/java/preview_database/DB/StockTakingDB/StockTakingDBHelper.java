@@ -1,4 +1,4 @@
-package preview_database.DB.ProductOrderDB;
+package preview_database.DB.StockTakingDB;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -12,9 +12,9 @@ import java.util.List;
 
 import Model.Product;
 
-public class OrderDBHelper extends SQLiteOpenHelper {
-    public static final String DATABASE_NAME = "Product_Order.db";
-    public static final String CONTACTS_TABLE_NAME = "Orders";
+public class StockTakingDBHelper extends SQLiteOpenHelper {
+    public static final String DATABASE_NAME = "StockTaking.db";
+    public static final String CONTACTS_TABLE_NAME = "StockTaking";
     public static final String COLUMN_ORDER_SKU = "SKU";
     public static final String COLUMN_ORDER_category = "Category";
     public static final String COLUMN_ORDER_image_PATH = "image_path";
@@ -30,7 +30,7 @@ public class OrderDBHelper extends SQLiteOpenHelper {
     public static final String COLUMN_ORDER_PRODUCT_product_VisitDate = "Visit_Date";
     public static final String COLUMN_ORDER_PRODUCT_product_Subinventory = "Subinventory";
 
-    public OrderDBHelper(Context context) {
+    public StockTakingDBHelper(Context context) {
         super(context, DATABASE_NAME , null, 4);
     }
 
@@ -50,12 +50,12 @@ public class OrderDBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS Orders");
         onCreate(db);
     }
-    public boolean insertItemOrder (String SKU, String Category, String image_path, String Brand, String Model
+    public boolean insertItemStockTaking (String SKU, String Category, String image_path, String Brand, String Model
             , String Description, String Quantity, String Customer_Number, String OnHand, Float UnitPrice, String Total,String Visit_Date,String Subinventory) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("SKU", SKU);
-        contentValues.put("Category", Category.toUpperCase());
+        contentValues.put("Category", Category);
         contentValues.put("image_path", image_path);
         contentValues.put("Brand", Brand);
         contentValues.put("Model", Model);
@@ -95,15 +95,10 @@ public class OrderDBHelper extends SQLiteOpenHelper {
     }
 
     public int numberOfRowsOrder(){
-        String countQuery = "SELECT  * FROM  Orders where Category in ('Refrigerator')";
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(countQuery, null);
-        int count = cursor.getCount();
-        cursor.close();
-        return count;
+        int numRows = (int) DatabaseUtils.queryNumEntries(db, CONTACTS_TABLE_NAME);
+        return numRows;
     }
-
-
 
     public boolean updateItemOrder (String SKU,String Quantity, String OnHand, Float UnitPrice, String Total) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -116,14 +111,6 @@ public class OrderDBHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public boolean updateCollectedSerial (String SKU,String C_Serial) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("C_Serial", C_Serial);
-        db.update("Orders", contentValues, "SKU = ? ", new String[] { SKU } );
-
-        return true;
-    }
 
     public Integer deleteSKU (String SKU) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -133,72 +120,14 @@ public class OrderDBHelper extends SQLiteOpenHelper {
     }
 
 
-    public ArrayList<String> getAllSKU () {
-        ArrayList<String> array_list = new ArrayList<String>();
 
-        //hp = new HashMap();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res =  db.rawQuery( "select * from Orders", null );
-        res.moveToFirst();
-
-        while(res.isAfterLast() == false){
-            array_list.add(res.getString(res.getColumnIndex(COLUMN_ORDER_SKU)));
-            res.moveToNext();
-        }
-        return array_list;
-    }
-    public void deleteAll(){
+    public void deleteAllStockTaking(){
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("delete from Orders");
         db.close();
     }
 
-    public List<Product> getAllOrderTocollectserial() {
-        List<Product> orders = new ArrayList<>();
-
-        // Select All Query
-        String selectQuery = "SELECT  * FROM Orders where Category in ('HAND SETS','LCD','LED','PLASMA','WASHING MACHINES','REFRIGERATOR','MICROWAVE','VACUUM CLEANER','BLU-RAY','DVD','HOME THEATRE','TABLET')";
-    //    String selectQuery = "SELECT  * FROM Orders where Category in ('Refrigerator')";
-
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
-
-        try {
-            // looping through all rows and adding to list
-            if (cursor.moveToFirst()) {
-                do {
-                    Product order = new Product();
-                    order.setSKU(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_SKU)));
-                    order.setCategory(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_category)));
-                    order.setBrand(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_product_brand)));
-                    order.setModel(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_product_model)));
-                    order.setQTY(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_product_QTY)));
-                    order.setImage(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_image_PATH)));
-                    order.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_product_description)));
-                    order.setCustomer_number(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_product_Customer_Number)));
-                    order.setOnHand(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_product_OnHand)));
-                    order.setUnitPrice(Float.valueOf(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_product_UnitPrice))));
-                    order.setTotal(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_product_Total)));
-                    order.setVisit_Date(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_PRODUCT_product_VisitDate)));
-                    order.setSubinventory(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_PRODUCT_product_Subinventory)));
-                    int i = Integer.valueOf(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_product_Collected_Serial)));
-                    order.setCollectedSerials(Integer.valueOf(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_product_Collected_Serial))));
-                    orders.add(order);
-                } while (cursor.moveToNext());
-
-            }}catch (Exception e){
-            e.printStackTrace();
-        }
-
-        // close db connection
-        db.close();
-
-        // return notes list
-        return orders;
-    }
-
-
-    public List<Product> getAllOrder() {
+    public List<Product> getAllStockTaking() {
         List<Product> orders = new ArrayList<>();
 
         // Select All Query
@@ -239,23 +168,5 @@ public class OrderDBHelper extends SQLiteOpenHelper {
 
         // return notes list
         return orders;
-    }
-
-    public String getVisitDatePendingOrder(){
-        SQLiteDatabase db = this.getWritableDatabase();
-        String query = "Select * from Orders ORDER BY SKU ASC LIMIT 1";
-        Cursor cursor =  db.rawQuery( query, null );
-        String Visit_Date = "";
-        try {
-            if (cursor.moveToFirst()) {
-                do {
-                    Visit_Date = cursor.getString(cursor.getColumnIndex("Visit_Date"));
-                } while (cursor.moveToNext());
-
-            }}catch (Exception e){
-            e.printStackTrace();
-        }
-        db.close();
-        return Visit_Date;
     }
 }
