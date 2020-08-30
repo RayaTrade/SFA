@@ -89,6 +89,16 @@ public class Product {
     @Expose
     public String HEIGHT = "";
 
+    public String getInventoryType() {
+        return InventoryType;
+    }
+
+    public void setInventoryType(String inventoryType) {
+        InventoryType = inventoryType;
+    }
+
+    public String InventoryType = "";
+
 
     public String getSubinventory() {
         return Subinventory;
@@ -247,7 +257,7 @@ public class Product {
     }
 
     public Product(String SKU, String category, String brand,String model, String QTY, String description, String image, float unitPrice, String onHand, String color, String customer_number,String total,String visit_Date,
-                   String  lENGTH ,  String  wEIGHT ,String wIDTH,String hEIGHT,String subinventory) {
+                   String  lENGTH ,  String  wEIGHT ,String wIDTH,String hEIGHT,String subinventory,String inventoryType) {
         this.SKU = SKU;
         Category = category;
         Brand = brand;
@@ -266,6 +276,7 @@ public class Product {
         WIDTH =wIDTH;
         HEIGHT = hEIGHT;
         Subinventory = subinventory;
+        InventoryType = inventoryType;
     }
     public String getVisit_Date() {
         return Visit_Date;

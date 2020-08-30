@@ -75,7 +75,17 @@ public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.SummaryH
         viewHolder.TxtSummaryProductSubinventory.setText(product.getSubinventory());
         viewHolder.TxSummarytproductQty.setText("Quantity: "+product.QTY);
 
-        if( User.Allow_Delivery_Method) {
+        if(OpenfromStockTaken)
+            viewHolder.TxtSummaryProductInventory.setText( "Inventory Type: " + product.getInventoryType());
+            else
+            viewHolder.TxtSummaryProductInventory.setVisibility(View.GONE);
+
+        if(OpenfromPreOrderPage)
+            viewHolder.TxtSummaryProductSubinventory.setVisibility(View.VISIBLE);
+        else
+            viewHolder.TxtSummaryProductSubinventory.setVisibility(View.GONE);
+
+        if( User.Allow_Delivery_Method && (OpenfromPreOrderPage)) {
             if (product.getHEIGHT().equals(""))
                 viewHolder.Product_warning.setVisibility(View.VISIBLE);
             else
@@ -102,7 +112,7 @@ public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.SummaryH
                 else if (OpenfromOrderPage==true)
                     deleteitemFromOrder(product.getSKU(),i,v);
                 else if(OpenfromStockTaken){
-                    deleteitemFromSrockTaking(product.getSKU(),i,v);
+                    deleteitemFromSrockTaking(product.getSKU(),i,v,product.getInventoryType());
                 }
             }
         });
@@ -121,6 +131,7 @@ public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.SummaryH
                 i.putExtra("customer_number",viewHolder.RowCustomer_number);
                 i.putExtra("onHand",viewHolder.RowOnHand);
                 i.putExtra("subinventory",product.getSubinventory());
+                i.putExtra("InventoryType",product.getInventoryType());
                 i.putExtra("openfromSummary",true);
                 i.putExtra("Order",true);
                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -184,13 +195,13 @@ public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.SummaryH
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
-  public void deleteitemFromSrockTaking(final String SKU,final int i,final View view){
+    public void deleteitemFromSrockTaking(final String SKU, final int i, final View view, final String inventoryType){
         new AsyncTask<Void, Void, Void>() {
 
             @Override
             protected Void doInBackground(Void... params) {
                 db_Stocktaking = new StockTakingDBHelper(context);
-                db_Stocktaking.deleteSKU(SKU);
+                db_Stocktaking.deleteSKU(SKU,inventoryType);
                 return null;
             }
 
@@ -211,7 +222,7 @@ public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.SummaryH
         return productList.size();
     }
     class SummaryHolder extends RecyclerView.ViewHolder{
-        TextView TxtSummaryproductSKU , TxtSummaryproductCategory,TxSummarytproductQty,TxtSummaryProductSubinventory;
+        TextView TxtSummaryproductSKU , TxtSummaryproductCategory,TxSummarytproductQty,TxtSummaryProductSubinventory,TxtSummaryProductInventory;
         ImageView IMGSummaryproduct,Product_warning;
         ImageButton btnDelete;
         String RowSKU;
@@ -230,6 +241,7 @@ public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.SummaryH
             TxtSummaryproductCategory = (TextView) itemView.findViewById(R.id.TxtSummaryCategory);
             TxSummarytproductQty = (TextView) itemView.findViewById(R.id.TxtSummaryProductQTY);
             TxtSummaryProductSubinventory = (TextView) itemView.findViewById(R.id.TxtSummaryProductSubinventory);
+            TxtSummaryProductInventory = (TextView) itemView.findViewById(R.id.TxtSummaryProductinventory);
             IMGSummaryproduct = (ImageView) itemView.findViewById(R.id.IMGSummaryproduct);
             Product_warning = (ImageView) itemView.findViewById(R.id.warning);
             btnDelete = (ImageButton) itemView.findViewById(R.id.btnDelete);

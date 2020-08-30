@@ -57,7 +57,8 @@ public class SyncDBHelper extends SQLiteOpenHelper {
 
         db.execSQL(
                 "create table Ora_Customers " +
-                        "(Customer_Number text primary key, " +
+                        "(ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                        "Customer_Number text, " +
                         "Customer_Name text," +
                         "PRICE_LIST text," +
                         "DueDateFrom datetime," +
@@ -73,6 +74,9 @@ public class SyncDBHelper extends SQLiteOpenHelper {
                         "CREDIT_LIMIT text,"+
                         "OVER_DRAFT text,"+
                         "REGION text,"+
+                        "BALANCE text,"+
+                        "RISKY_CHECKS text,"+
+                        "OUTSTANDING text,"+
                         "AREA text)"
 
 
@@ -174,6 +178,10 @@ public class SyncDBHelper extends SQLiteOpenHelper {
                         "(Name text primary key)"
         );
         db.execSQL(
+                "create table InventoryTypes " +
+                        "(Name text primary key)"
+        );
+        db.execSQL(
                 "create table SalesReasonOffline " +
                         "(Reason text primary key)"
         );
@@ -266,7 +274,9 @@ public class SyncDBHelper extends SQLiteOpenHelper {
                         "Submitter text," +
                         "QtyinStock text," +
                         "Total text," +
-                        "Total_History text,Subinventory text)"
+                        "Total_History text," +
+                        "Subinventory text," +
+                        "Inventory text)"
         );
         db.execSQL(
                 "create table TransactionSerialsOffline " +
@@ -332,6 +342,7 @@ public class SyncDBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS ModelOffline");
         db.execSQL("DROP TABLE IF EXISTS DeliveryMethodOffline");
         db.execSQL("DROP TABLE IF EXISTS TenderTypes");
+        db.execSQL("DROP TABLE IF EXISTS InventoryTypes");
         db.execSQL("DROP TABLE IF EXISTS SalesReasonOffline");
         db.execSQL("DROP TABLE IF EXISTS EndUserPriceOffline");
         db.execSQL("DROP TABLE IF EXISTS Ora_PriceList");
@@ -986,7 +997,7 @@ public void deletepromotion() {
     }
 
 
-    public long InsertTransactionItemsOffline(String HeaderID, String ItemCode, String Qty, String UnitPrice, String Discount, String Submitter, String QtyinStock,String Subinventory) {
+    public long InsertTransactionItemsOffline(String HeaderID, String ItemCode, String Qty, String UnitPrice, String Discount, String Submitter, String QtyinStock,String Subinventory,String Inventory) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("HeaderID", HeaderID);
@@ -997,6 +1008,7 @@ public void deletepromotion() {
         contentValues.put("Submitter", Submitter);
         contentValues.put("QtyinStock", QtyinStock);
         contentValues.put("Subinventory", Subinventory);
+        contentValues.put("Inventory", Inventory);
         contentValues.put("Total", String.valueOf( Double.parseDouble(UnitPrice) * Integer.parseInt(Qty) ));
 
         String currentDate = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new Date());
@@ -1065,6 +1077,7 @@ public void deletepromotion() {
                     item.setSubmitter(cursor.getString(cursor.getColumnIndex("Submitter")));
                     item.setQtyinStock(cursor.getString(cursor.getColumnIndex("QtyinStock")));
                     item.setSubinventory(cursor.getString(cursor.getColumnIndex("Subinventory")));
+                    item.setInventory(cursor.getString(cursor.getColumnIndex("Inventory")));
 
                     items.add(item);
                 } while (cursor.moveToNext());
@@ -1104,39 +1117,6 @@ public void deletepromotion() {
     }
 
 
-    public List<Items> getAllTransactionItemsOffline_SyncBack(final String HeaderID) {
-        List<Items> items = new ArrayList<>();
-
-       // String selectQuery = "SELECT  * FROM Transaction_Items where Submitter != 'Promotion' and HeaderID=" + HeaderID;
-        String selectQuery = "SELECT  * FROM Transaction_Items where Submitter != 'Promotion' and HeaderID=" + HeaderID;
-
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
-
-        try {
-            if (cursor.moveToFirst()) {
-                do {
-                    Items item = new Items();
-                    item.setId(Integer.valueOf(cursor.getString(cursor.getColumnIndex("Id"))));
-                    item.setHeaderId(cursor.getString(cursor.getColumnIndex("HeaderID")));
-                    item.setItemCode(cursor.getString(cursor.getColumnIndex("ITEM_CODE")));
-                    item.setQty(cursor.getString(cursor.getColumnIndex("Qty")));
-                    item.setUnitPrice(cursor.getString(cursor.getColumnIndex("UnitPrice")));
-                    item.setDiscount(cursor.getString(cursor.getColumnIndex("Discount")));
-                    item.setSubmitter(cursor.getString(cursor.getColumnIndex("Submitter")));
-                    item.setQtyinStock(cursor.getString(cursor.getColumnIndex("QtyinStock")));
-
-                    items.add(item);
-                } while (cursor.moveToNext());
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        db.close();
-        return items;
-    }
-
 
     //#endregion
 
@@ -1161,7 +1141,7 @@ public void deletepromotion() {
     //#region Ora_Customers
     public boolean InsertCustomersOffline(ContentValues contentValues) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.insert("Ora_Customers", null, contentValues);
+      long result =   db.insert("Ora_Customers", null, contentValues);
         db.close();//
         return true;
     }
@@ -1197,6 +1177,9 @@ public void deletepromotion() {
                     customer.setREGION(cursor.getString(cursor.getColumnIndex("REGION")));
                     customer.setPRIMARY_SALESREP_NAME(cursor.getString(cursor.getColumnIndex("PRIMARY_SALESREP_NAME")));
                     customer.setOVER_DRAFT(cursor.getString(cursor.getColumnIndex("OVER_DRAFT")));
+                    customer.setOUTSTANDING(cursor.getString(cursor.getColumnIndex("OUTSTANDING")));
+                    customer.setRISKY_CHECKS(cursor.getString(cursor.getColumnIndex("RISKY_CHECKS")));
+                    customer.setBALANCE(cursor.getString(cursor.getColumnIndex("BALANCE")));
 
                     customers.add(customer);
                 } while (cursor.moveToNext());
@@ -1230,13 +1213,22 @@ public void deletepromotion() {
 
     //#endregion
 
-    //#region TenderTypes
+    //#region TenderTypes && InventoryTypes
     public boolean InsertTenderTypeOffline(String TenderType) {
     SQLiteDatabase db = this.getWritableDatabase();
     ContentValues contentValues = new ContentValues();
     contentValues.put("Name", TenderType);
 
     db.insert("TenderTypes", null, contentValues);
+    db.close();
+    return true;
+}
+public boolean InsertInventoryTypesOffline(String InventoryTypes) {
+    SQLiteDatabase db = this.getWritableDatabase();
+    ContentValues contentValues = new ContentValues();
+    contentValues.put("Name", InventoryTypes);
+
+    db.insert("InventoryTypes", null, contentValues);
     db.close();
     return true;
 }
@@ -1252,11 +1244,27 @@ public void deletepromotion() {
         } else {
             return true;
         }
+    }  public boolean checkifInventoryTypesOfflineEmpty() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String count = "SELECT count(*) FROM InventoryTypes";
+        Cursor mcursor = db.rawQuery(count, null);
+        mcursor.moveToFirst();
+        int icount = mcursor.getInt(0);
+        if (icount > 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public void deleteAllTenderTypeOfflineOffline() {
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("delete from TenderTypes");
+        db.close();
+    }
+    public void deleteAllInventoryTypesOfflineOffline() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("delete from InventoryTypes");
         db.close();
     }
 
@@ -1282,6 +1290,29 @@ public void deletepromotion() {
         }
         db.close();
         return tenderTypes;
+    }
+    public List<InventoryType> getAllInventoryTypesOffline() {
+        List<InventoryType> InventoryTypes = new ArrayList<>();
+
+        String selectQuery = "SELECT  * FROM InventoryTypes";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        try {
+            if (cursor.moveToFirst()) {
+                do {
+                    InventoryType inventoryType = new InventoryType();
+                    inventoryType.setName(cursor.getString(cursor.getColumnIndex("Name")));
+                    InventoryTypes.add(inventoryType);
+                } while (cursor.moveToNext());
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        db.close();
+        return InventoryTypes;
     }
 
     //#endregion

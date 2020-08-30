@@ -1,25 +1,90 @@
 package Model;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 public class Customer {
+    @SerializedName("Customer_Number")
+    @Expose
     public String Number;
+    @SerializedName("Customer_Name")
+    @Expose
     public String Name;
+    @SerializedName("PRICE_LIST")
+    @Expose
     public String Price_list;
+    @SerializedName("DueDateFrom")
+    @Expose
     public String DueDateFrom;
+
     public String DueDateTo;
+    @SerializedName("ScheuleID")
+    @Expose
     public String ScheuleID;
+    @SerializedName("VisitID")
+    @Expose
     public String VisitID;
 
+    @SerializedName("CUSTOMER_CLASS")
+    @Expose
     public String CUSTOMER_CLASS;
+    @SerializedName("CREATION_DATE")
+    @Expose
     public String CREATION_DATE;
+    @SerializedName("CUSTOMER_CATEGORY")
+    @Expose
     public String CUSTOMER_CATEGORY;
+    @SerializedName("PRIMARY_SALESREP_NAME")
+    @Expose
     public String PRIMARY_SALESREP_NAME;
+    @SerializedName("PAYMENT_TERM")
+    @Expose
     public String PAYMENT_TERM;
+    @SerializedName("CITY")
+    @Expose
     public String CITY;
+    @SerializedName("COUNTRY")
+    @Expose
     public String COUNTRY;
+    @SerializedName("CREDIT_LIMIT")
+    @Expose
     public String CREDIT_LIMIT;
+    @SerializedName("OVER_DRAFT")
+    @Expose
     public String OVER_DRAFT;
+    @SerializedName("REGION")
+    @Expose
     public String REGION;
+    @SerializedName("AREA")
+    @Expose
     public String AREA;
+
+
+
+    @SerializedName("BALANCE")
+    @Expose
+    public String BALANCE;
+    @SerializedName("OUTSTANDING")
+    @Expose
+    public String OUTSTANDING;
+    @SerializedName("RISKY_CHECKS")
+    @Expose
+    public String RISKY_CHECKS;
+
+
+    public Customer(String number, String name, String price_list, String dueDateFrom, String dueDateTo, String scheuleID, String visitID,String customerBalance,String customerCreditLimit,String customerOutstanding,String customerRISKY_CHECKS) {
+        Number = number;
+        Name = name;
+        Price_list = price_list;
+        DueDateFrom = dueDateFrom;
+        DueDateTo = dueDateTo;
+        ScheuleID = scheuleID;
+        VisitID = visitID;
+        BALANCE = customerBalance;
+        CREDIT_LIMIT=customerCreditLimit;
+        OUTSTANDING = customerOutstanding;
+        RISKY_CHECKS = customerRISKY_CHECKS;
+    }
 
     public Customer(String number, String name, String price_list, String dueDateFrom, String dueDateTo, String scheuleID, String visitID) {
         Number = number;
@@ -30,10 +95,33 @@ public class Customer {
         ScheuleID = scheuleID;
         VisitID = visitID;
     }
-
     public Customer() {
     }
 
+
+    public String getBALANCE() {
+        return BALANCE;
+    }
+
+    public void setBALANCE(String BALANCE) {
+        this.BALANCE = BALANCE;
+    }
+
+    public String getOUTSTANDING() {
+        return OUTSTANDING;
+    }
+
+    public void setOUTSTANDING(String OUTSTANDING) {
+        this.OUTSTANDING = OUTSTANDING;
+    }
+
+    public String getRISKY_CHECKS() {
+        return RISKY_CHECKS;
+    }
+
+    public void setRISKY_CHECKS(String RISKY_CHECKS) {
+        this.RISKY_CHECKS = RISKY_CHECKS;
+    }
     public String getNumber() {
         return Number;
     }

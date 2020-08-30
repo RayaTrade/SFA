@@ -52,6 +52,7 @@ import Adapter.HistoryAdapter;
 import Adapter.HistoryDetailAdapter;
 import Model.Customer;
 import Model.OrderReceipt;
+import Model.Parsing_Json.SFA_Customers;
 import Model.Parsing_Json.SFA_GetTruckType;
 import Model.Parsing_Json.SFA_Items_All;
 import Model.Parsing_Json.SFA_User_X_Subinventory;
@@ -720,6 +721,55 @@ public class API_Online extends LoginActivity{
         }
     }
 
+    List<String> InventoryTypes;
+    public boolean SFA_GetInventoryTypes(final Spinner spinner, final Context context) {
+        String urlTender;
+
+        urlTender = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_GetInventoryTypes/" + User.ServerConfigID;
+
+        urlTender = urlTender.replaceAll(" ", "%20");
+
+        StringRequest TenderRequest = new StringRequest(Request.Method.GET, urlTender, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject object = new JSONObject(response);
+                    JSONArray array = object.getJSONArray("SFA_GetInventoryTypesResult");
+                    Log.v("InventoryTypes_Method",array.toString());
+
+                    InventoryTypes = new ArrayList<>();
+                    for (int i = 0; i < array.length(); i++) {
+                        String result = array.get(i).toString();
+                        InventoryTypes.add(result);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    //Setting adapter to show the items in the spinner
+                    spinner.setAdapter(new ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item, InventoryTypes));
+
+                    Log.v("Inventory Type Method",InventoryTypes.toString());
+
+                } catch (Exception e) {
+                    Toast.makeText(context, "Inventory Type not available", Toast.LENGTH_LONG).show();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(context, "Inventory Type not available , Please check your network !", Toast.LENGTH_LONG).show();
+            }
+
+        });
+        Volley.newRequestQueue(context).add(TenderRequest);
+        if (spinner.getCount() < 1) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     public void SFA_Items_All(final Context context, final Activity activity, String Category, final String customerNumber, String Brand, String Model, String TransactionType, String subinventoryID) {
         String url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_Items_All_Test/" + User.ServerConfigID + "/" + customerNumber + "/" + Category + "/" + Brand + "/" + Model + "/" + User.Username + "/" + TransactionType+"/"+subinventoryID;
 
@@ -800,7 +850,7 @@ public class API_Online extends LoginActivity{
         StringRequest customerRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                try {
+                /*try {
                     JSONObject object = new JSONObject(response);
                     JSONArray array = object.getJSONArray("SFA_CustomersResult");
                     customerList = new ArrayList<>();
@@ -819,8 +869,10 @@ public class API_Online extends LoginActivity{
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
-                }
-                ((CustomerActivity) activity).RenderList(customerList, false, recyclerView);
+                }*/
+                    SFA_Customers sfa_customers = new Gson().fromJson(response, SFA_Customers.class);
+
+                    ((CustomerActivity) activity).RenderList(sfa_customers.getCustomer(), false, recyclerView);
                 ((CustomerActivity) activity).ChangeTotalVisitTxt(String.valueOf(customerList.size()));
                 progressBar.setVisibility(View.GONE);
 
@@ -845,7 +897,7 @@ public class API_Online extends LoginActivity{
         StringRequest customerRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                try {
+                /*try {
                     JSONObject object = new JSONObject(response);
                     JSONArray array = object.getJSONArray("SFA_Customers_FilterResult");
                     customerList = new ArrayList<>();
@@ -864,8 +916,10 @@ public class API_Online extends LoginActivity{
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
-                }
-                ((CustomerActivity) activity).RenderList(customerList, false, recyclerView);
+                }*/
+                SFA_Customers sfa_customers = new Gson().fromJson(response, SFA_Customers.class);
+
+                ((CustomerActivity) activity).RenderList(sfa_customers.getCustomer(), false, recyclerView);
                 ((CustomerActivity) activity).ChangeTotalVisitTxt(String.valueOf(customerList.size()));
                 progressBar.setVisibility(View.GONE);
 
@@ -936,7 +990,32 @@ public class API_Online extends LoginActivity{
         Volley.newRequestQueue(context).add(customerRequest);
     }
 
+    public void SubmitComplaint(String obj, final ProgressDialog dialog, final Activity activity)
+    {
+        String url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SubmitComplaint";
+        new Http().httpPost(url,obj , new Http.RequestCallback() {
+            @Override
+            public void onError(Throwable exception) {
+                dialog.dismiss();
+                Toast.makeText(activity,"Fail to submit complaint due to your network",Toast.LENGTH_SHORT).show();
+            }
 
+            @Override
+            public void onResponseReceived(HttpResponse httpResponse, String response) {
+
+                response = new Http().ReadResponse(httpResponse).replaceAll("[\\n\\t ]", "");;
+                dialog.dismiss();
+                if(Integer.valueOf(response) != 0)
+                {
+                    new DialogHint().allertdialog(activity,"Complaint","complaint ID: "+response,false);
+                    Toast.makeText(activity,"Your complaint submit successfully",Toast.LENGTH_SHORT).show();
+                }
+                else
+                    Toast.makeText(activity,"Your complaint submit not saved",Toast.LENGTH_SHORT).show();
+
+            }
+        });
+    }
     //---------------------------
 
     /* # change date 14/11/2019
@@ -966,6 +1045,7 @@ public class API_Online extends LoginActivity{
                         object.put("Discount","0");
                         object.put("UnitPrice" , product.UnitPrice);
                         object.put("Subinventory" , product.Subinventory);
+                        object.put("Inventory" , product.getInventoryType());
                 if(TransactionType.equals("2")) {
                     try {
                         Serial_list = ((CollectSerialActivity) activity).List_getSerialsByItemCode(HeaderId, context, product.SKU);
@@ -1080,37 +1160,43 @@ public class API_Online extends LoginActivity{
 
                         if (!result.equals("") || !result.equals(null)) {
 
-                            OrderReceipt orderReceipt = new Gson().fromJson(result,OrderReceipt.class);
+                            OrderReceipt orderReceipt = new Gson().fromJson(result, OrderReceipt.class);
                             orderReceipt.setCustomername(CustomerName);
                             orderReceipt.setSales_name(Submitter);
                             saved = true;
 
-                            Intent i = new Intent(context, FinishOnlineActivity.class);
-                            if (result != null && !orderReceipt.getTotalAmount().equals("")) {
+                            if (orderReceipt.isOrderSaved())
+                            {    Intent i = new Intent(context, FinishOnlineActivity.class);
+                                if (result != null && !orderReceipt.getTotalAmount().equals("")) {
 
-                                new OrderReceipt().setOrderReceipt(orderReceipt);
-                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                dialogSave.dismiss();
+                                    new OrderReceipt().setOrderReceipt(orderReceipt);
+                                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    dialogSave.dismiss();
 
-                                if (OpenFrom.equals("preorder")) {
-                                    db.deleteAll();
-                                } else if (OpenFrom.equals("order")) {
-                                    db_order.deleteAll();
-                                    db_serial.deleteAll();
-                                } else if (OpenFrom.equals("dealer")) {
-                                    db_dealer.deleteAllDealerOrder();
+                                    if (OpenFrom.equals("preorder")) {
+                                        db.deleteAll();
+                                    } else if (OpenFrom.equals("order")) {
+                                        db_order.deleteAll();
+                                        db_serial.deleteAll();
+                                    } else if (OpenFrom.equals("dealer")) {
+                                        db_dealer.deleteAllDealerOrder();
+                                    } else if (OpenFrom.equals("StockTaking")) {
+                                        db_Stock.deleteAllStockTaking();
+                                    }
+
+                                    context.startActivity(i);
+                                    activity.finish();
+
+
+                                } else {
+                                    dialogSave.dismiss();
+                                    Toast.makeText(context, orderReceipt.getOrderId(), Toast.LENGTH_LONG).show();
                                 }
-
-                                context.startActivity(i);
-                                activity.finish();
-
-
-
-                            } else {
-                                dialogSave.dismiss();
-                                Toast.makeText(context, orderReceipt.getOrderId(), Toast.LENGTH_LONG).show();
                             }
-
+                            else{
+                                dialogSave.dismiss();
+                                new DialogHint().allertdialog(activity,"Order Not Saved",orderReceipt.getOrderId(),true);
+                            }
                         } else {
                             saved = false;
                             dialogSave.dismiss();

@@ -306,7 +306,7 @@ public class CollectSerialActivity extends AppCompatActivity {
 
                                    String DetailId = "";
                                    for (Product product : productList) {
-                                       DetailId = String.valueOf(db_sync.InsertTransactionItemsOffline(Headerid, product.SKU, product.QTY, String.valueOf(product.UnitPrice), "0", emailpref, product.OnHand,product.Subinventory));
+                                       DetailId = String.valueOf(db_sync.InsertTransactionItemsOffline(Headerid, product.SKU, product.QTY, String.valueOf(product.UnitPrice), "0", emailpref, product.OnHand,product.Subinventory,product.getInventoryType()));
 
                                        String serials = getSerialsByItemCode(getBaseContext(),Headerid ,product.SKU);
                                        db_sync.InsertTransactionSerialsOffline(Headerid, DetailId, serials, product.SKU);

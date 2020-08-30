@@ -255,7 +255,7 @@ public class ProductDealerAdapter extends RecyclerView.Adapter<ProductDealerAdap
                         ,Color
                         ,Customer_number
                         ,Total
-                        ,Visit_Date,"","","","","");
+                        ,Visit_Date,"","","","","","");
 
 
                if(OpenfromDealerOrder==true){

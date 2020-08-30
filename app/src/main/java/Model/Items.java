@@ -16,6 +16,16 @@ public class Items {
 
     private String Subinventory;
 
+    public String getInventory() {
+        return Inventory;
+    }
+
+    public void setInventory(String inventory) {
+        Inventory = inventory;
+    }
+
+    private String Inventory;
+
 
     //------------
     @SerializedName("ITEM_CODE")

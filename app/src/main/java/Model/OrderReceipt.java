@@ -17,6 +17,18 @@ public class OrderReceipt  {
     @Expose
     boolean IsOrder = false;
 
+    public boolean isOrderSaved() {
+        return IsOrderSaved;
+    }
+
+    public void setOrderSaved(boolean orderSaved) {
+        IsOrderSaved = orderSaved;
+    }
+
+    @SerializedName("IsOrderSaved")
+    @Expose
+    boolean IsOrderSaved = false;
+
     @SerializedName("PromotionDesc")
     @Expose
     String PromotionDesc = "";

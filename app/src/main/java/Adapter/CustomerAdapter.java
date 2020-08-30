@@ -17,6 +17,7 @@ import Utility.DialogHint;
 import com.example.ahmed_hasanein.sfa.MainActivity;
 import com.example.ahmed_hasanein.sfa.R;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,16 +87,36 @@ public class CustomerAdapter extends RecyclerView.Adapter<CustomerAdapter.Custom
                         i.putExtra("customerDueDateFrom", customer.DueDateFrom);
                         i.putExtra("CustomerPrice_list", customer.Price_list);
                         i.putExtra("firstOpen", true);
+                        i.putExtra("CREDIT_LIMIT", ConvertReformateNumber(customer.CREDIT_LIMIT));
+                        i.putExtra("BALANCE", ConvertReformateNumber(customer.BALANCE));
+                        i.putExtra("OUTSTANDING", ConvertReformateNumber(customer.OUTSTANDING));
+                        i.putExtra("RISKY_CHECKS", ConvertReformateNumber(customer.RISKY_CHECKS));
+
                         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         activity.startActivity(i);
                     }
                 }
                 else
-                new DialogHint().Customer_Visit_Dialog(v,context,activity, User.ServerConfigID,customer.Price_list,customer.Name,customer.Number,customer.DueDateFrom,User.Username);
+                new DialogHint().Customer_Visit_Dialog(v,context,activity, User.ServerConfigID,customer.Price_list,customer.Name,customer.Number,customer.DueDateFrom,User.Username,customer.CREDIT_LIMIT,customer.BALANCE,customer.OUTSTANDING,customer.RISKY_CHECKS);
             }
         });
     }
 
+    private String ConvertReformateNumber(String number){
+        if(number.equals(""))
+        {
+            return "0.00";
+        }
+        else {
+            Float litersOfPetrol = Float.parseFloat(number);
+            DecimalFormat df = new DecimalFormat("0.00");
+            df.setGroupingUsed(true);
+            df.setGroupingSize(3);
+            df.setMaximumFractionDigits(2);
+            number = df.format(litersOfPetrol);
+            return number;
+        }
+    }
 
     @Override
     public int getItemCount() {

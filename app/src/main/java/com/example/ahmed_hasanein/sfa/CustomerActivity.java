@@ -445,6 +445,10 @@ public class CustomerActivity extends AppCompatActivity implements SearchView.On
                 String customerDueDateFrom = "";
                 String customerDueDateTo = "";
                 String customerScheuleID = "";
+                String customerBalance = "";
+                String customerOutstanding = "";
+                String customerCreditLimit ="";
+                String customerRISKY_CHECKS = "";
                 if (customerNumber != null || !customerNumber.equals("")) {
                     for (Customer c : customerList) {
                         if (c.getNumber().equals(customerNumber)) {
@@ -454,10 +458,14 @@ public class CustomerActivity extends AppCompatActivity implements SearchView.On
                             customerDueDateTo = c.DueDateTo;
                             customerScheuleID = c.ScheuleID;
                             customerVisitID = c.VisitID;
+                            customerBalance = c.BALANCE;
+                            customerCreditLimit = c.CREDIT_LIMIT;
+                            customerOutstanding = c.OUTSTANDING;
+                            customerRISKY_CHECKS = c.RISKY_CHECKS;
                         }
                     }
                     if (!customerName.equals("")) {
-                        customer = new Customer(customerNumber, customerName, customerPriceList, customerDueDateFrom, customerDueDateTo, customerScheuleID, customerVisitID);
+                        customer = new Customer(customerNumber, customerName, customerPriceList, customerDueDateFrom, customerDueDateTo, customerScheuleID, customerVisitID,customerBalance,customerCreditLimit,customerOutstanding,customerRISKY_CHECKS);
                         if (!customerNumber.equals("")) {
                             PendingcustomerList.add(customer);
                         }
@@ -495,6 +503,10 @@ public class CustomerActivity extends AppCompatActivity implements SearchView.On
                 String customerDueDateFrom = "";
                 String customerDueDateTo = "";
                 String customerScheuleID = "";
+                String customerBalance = "";
+                String customerOutstanding = "";
+                String customerCreditLimit ="";
+                String customerRISKY_CHECKS = "";
                 if (customerNumber != null || !customerNumber.equals("")) {
                     for (Customer c : customerList) {
                         if (c.getNumber().equals(customerNumber)) {
@@ -504,10 +516,14 @@ public class CustomerActivity extends AppCompatActivity implements SearchView.On
                             customerDueDateTo = c.DueDateTo;
                             customerScheuleID = c.ScheuleID;
                             customerVisitID = c.VisitID;
+                            customerBalance = c.BALANCE;
+                            customerCreditLimit = c.CREDIT_LIMIT;
+                            customerOutstanding = c.OUTSTANDING;
+                            customerRISKY_CHECKS = c.RISKY_CHECKS;
                         }
                     }
                     if (!customerName.equals("")) {
-                        customer = new Customer(customerNumber, customerName, customerPriceList, customerDueDateFrom, customerDueDateTo, customerScheuleID, customerVisitID);
+                        customer = new Customer(customerNumber, customerName, customerPriceList, customerDueDateFrom, customerDueDateTo, customerScheuleID, customerVisitID,customerBalance,customerCreditLimit,customerOutstanding,customerRISKY_CHECKS);
                         if (!customerNumber.equals("")) {
                             PendingcustomerList.add(customer);
                         }
@@ -545,6 +561,11 @@ public class CustomerActivity extends AppCompatActivity implements SearchView.On
                 String customerDueDateFrom = "";
                 String customerDueDateTo = "";
                 String customerScheuleID = "";
+
+                String customerBalance = "";
+                String customerOutstanding = "";
+                String customerCreditLimit ="";
+                String customerRISKY_CHECKS = "";
                 if (customerNumber != null || !customerNumber.equals("")) {
                     for (Customer c : customerList) {
                         if (c.getNumber().equals(customerNumber)) {
@@ -554,10 +575,15 @@ public class CustomerActivity extends AppCompatActivity implements SearchView.On
                             customerDueDateTo = c.DueDateTo;
                             customerScheuleID = c.ScheuleID;
                             customerVisitID = c.VisitID;
+
+                            customerBalance = c.BALANCE;
+                            customerCreditLimit = c.CREDIT_LIMIT;
+                            customerOutstanding = c.OUTSTANDING;
+                            customerRISKY_CHECKS = c.RISKY_CHECKS;
                         }
                     }
                     if (!customerName.equals("")) {
-                        customer = new Customer(customerNumber, customerName, customerPriceList, customerDueDateFrom, customerDueDateTo, customerScheuleID, customerVisitID);
+                        customer = new Customer(customerNumber, customerName, customerPriceList, customerDueDateFrom, customerDueDateTo, customerScheuleID, customerVisitID,customerBalance,customerCreditLimit,customerOutstanding,customerRISKY_CHECKS);
                         if (!customerNumber.equals("")) {
                             PendingcustomerList.add(customer);
                         }
@@ -593,6 +619,10 @@ public class CustomerActivity extends AppCompatActivity implements SearchView.On
                 String customerDueDateTo = "";
                 String customerScheuleID = "";
                 String customerVisitID = "";
+                String customerBalance = "";
+                String customerOutstanding = "";
+                String customerCreditLimit ="";
+                String customerRISKY_CHECKS = "";
                 if (customerNumber != null || !customerNumber.equals("")) {
                     for (Customer c : customerList) {
                         if (c.getNumber().equals(customerNumber)) {
@@ -602,9 +632,13 @@ public class CustomerActivity extends AppCompatActivity implements SearchView.On
                             customerDueDateTo = c.DueDateTo;
                             customerScheuleID = c.ScheuleID;
                             customerVisitID = c.VisitID;
+                            customerBalance = c.BALANCE;
+                            customerCreditLimit = c.CREDIT_LIMIT;
+                            customerOutstanding = c.OUTSTANDING;
+                            customerRISKY_CHECKS = c.RISKY_CHECKS;
                         }
                     }
-                    customer = new Customer(customerNumber, customerName, customerPriceList, customerDueDateFrom, customerDueDateTo, customerScheuleID, customerVisitID);
+                    customer = new Customer(customerNumber, customerName, customerPriceList, customerDueDateFrom, customerDueDateTo, customerScheuleID, customerVisitID,customerBalance,customerCreditLimit,customerOutstanding,customerRISKY_CHECKS);
                     customerList = new ArrayList<>();
                     if (!customerNumber.equals("")) {
                         customerList.add(customer);

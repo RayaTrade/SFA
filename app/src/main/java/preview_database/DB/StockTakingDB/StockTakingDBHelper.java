@@ -29,6 +29,7 @@ public class StockTakingDBHelper extends SQLiteOpenHelper {
     public static final String COLUMN_ORDER_product_Collected_Serial = "C_Serial";
     public static final String COLUMN_ORDER_PRODUCT_product_VisitDate = "Visit_Date";
     public static final String COLUMN_ORDER_PRODUCT_product_Subinventory = "Subinventory";
+    public static final String COLUMN_ORDER_PRODUCT_product_Inventory = "Inventory";
 
     public StockTakingDBHelper(Context context) {
         super(context, DATABASE_NAME , null, 4);
@@ -39,9 +40,9 @@ public class StockTakingDBHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(
                 "create table Orders " +
-                        "(SKU text primary key, Category text NOT NULL,image_path text NOT NULL,Brand text NOT NULL" +
+                        "(ID primary key,SKU text NOT NULL, Category text NOT NULL,image_path text NOT NULL,Brand text NOT NULL" +
                         ",Model text NOT NULL,Description text NOT NULL,Quantity text NOT NULL,Customer_Number text NOT NULL" +
-                        ",OnHand text NOT NULL,UnitPrice text NOT NULL,Total text NOT NULL,Visit_Date text NOT NULL,Subinventory text NOT NULL,C_Serial text NOT NULL DEFAULT '0')"
+                        ",OnHand text NOT NULL,UnitPrice text NOT NULL,Total text NOT NULL,Visit_Date text NOT NULL,Subinventory text NOT NULL,Inventory text NOT NULL,C_Serial text NOT NULL DEFAULT '0')"
         );
     }
 
@@ -51,7 +52,7 @@ public class StockTakingDBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
     public boolean insertItemStockTaking (String SKU, String Category, String image_path, String Brand, String Model
-            , String Description, String Quantity, String Customer_Number, String OnHand, Float UnitPrice, String Total,String Visit_Date,String Subinventory) {
+            , String Description, String Quantity, String Customer_Number, String OnHand, Float UnitPrice, String Total,String Visit_Date,String Subinventory,String Inventory) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("SKU", SKU);
@@ -66,11 +67,14 @@ public class StockTakingDBHelper extends SQLiteOpenHelper {
         contentValues.put("UnitPrice", UnitPrice);
         contentValues.put("Visit_Date", Visit_Date);
         contentValues.put("Subinventory", Subinventory);
+        contentValues.put("Inventory", Inventory);
         contentValues.put("Total", Total);
 
-        db.insert("Orders", null, contentValues);
-
-        return true;
+        long rowInserted =   db.insert("Orders", null, contentValues);
+        if(rowInserted != -1)
+            return true;
+        else
+            return  false;
     }
 
     public Cursor getDatabySKU(String SKU) {
@@ -80,10 +84,10 @@ public class StockTakingDBHelper extends SQLiteOpenHelper {
     }
 
 
-    public boolean CheckSKUOrder(String SKU) {
+    public boolean CheckSKUOrder(String SKU,String Inventory) {
         Cursor cursor = null;
         SQLiteDatabase db = this.getReadableDatabase();
-        String sql ="SELECT SKU FROM Orders WHERE SKU='"+SKU+"'";
+        String sql ="SELECT SKU FROM Orders WHERE SKU='"+SKU+"' and Inventory ='"+Inventory+"'";
         cursor= db.rawQuery(sql,null);
 
         if(cursor.getCount()>0){
@@ -100,23 +104,23 @@ public class StockTakingDBHelper extends SQLiteOpenHelper {
         return numRows;
     }
 
-    public boolean updateItemOrder (String SKU,String Quantity, String OnHand, Float UnitPrice, String Total) {
+    public boolean updateItemOrder (String SKU,String Quantity, String OnHand, Float UnitPrice, String Total,String Inventory) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("Quantity", Quantity);
         contentValues.put("OnHand", OnHand);
         contentValues.put("UnitPrice", UnitPrice);
         contentValues.put("Total", Total);
-        db.update("Orders", contentValues, "SKU = ? ", new String[] { SKU } );
+        db.update("Orders", contentValues, "SKU = ?  and Inventory= ?", new String[] { SKU,Inventory } );
         return true;
     }
 
 
-    public Integer deleteSKU (String SKU) {
+    public Integer deleteSKU (String SKU,String Inventory) {
         SQLiteDatabase db = this.getWritableDatabase();
         return db.delete("Orders",
-                "SKU = ? ",
-                new String[] { SKU });
+                "SKU = ? and Inventory= ?",
+                new String[] { SKU , Inventory});
     }
 
 
@@ -154,6 +158,7 @@ public class StockTakingDBHelper extends SQLiteOpenHelper {
                     order.setTotal(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_product_Total)));
                     order.setVisit_Date(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_PRODUCT_product_VisitDate)));
                     order.setSubinventory(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_PRODUCT_product_Subinventory)));
+                    order.setInventoryType(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_PRODUCT_product_Inventory)));
                     int i = Integer.valueOf(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_product_Collected_Serial)));
                     order.setCollectedSerials(Integer.valueOf(cursor.getString(cursor.getColumnIndex(COLUMN_ORDER_product_Collected_Serial))));
                     orders.add(order);

@@ -86,6 +86,10 @@ import static com.example.ahmed_hasanein.sfa.DashboardActivity.OpenfromStockTake
 import static com.example.ahmed_hasanein.sfa.LoginActivity.OfflineMode;
 import static com.example.ahmed_hasanein.sfa.LoginActivity.ServerConfigIDpref;
 import static com.example.ahmed_hasanein.sfa.LoginActivity.emailpref;
+import static com.example.ahmed_hasanein.sfa.MainActivity.C_BALANCE;
+import static com.example.ahmed_hasanein.sfa.MainActivity.C_CREDIT_LIMIT;
+import static com.example.ahmed_hasanein.sfa.MainActivity.C_OUTSTANDING;
+import static com.example.ahmed_hasanein.sfa.MainActivity.C_RISKY_CHECKS;
 import static com.example.ahmed_hasanein.sfa.MainActivity.SelectedCustomerName;
 import static com.example.ahmed_hasanein.sfa.MainActivity.SelectedCustomerNumber;
 import static com.example.ahmed_hasanein.sfa.MainActivity.CustomerPrice_list;
@@ -97,7 +101,8 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
     static List<Product> productList;
     RecyclerView recyclerView;
     ProgressBar mProgressBar;
-  public   static TextView SummaryCustomerNumber, txtVNumberSummary, SummaryCustomerName,Recomendtext,Trucktext,TruckSpacetext,TruckNumtext;
+  public   static TextView SummaryCustomerNumber, txtVNumberSummary, SummaryCustomerName,Recomendtext,Trucktext,TruckSpacetext,TruckNumtext
+          ,TxtBALANCE,TxtRISKY_CHECKS,TxtCREDIT_LIMIT,TxtOUTSTANDING;
     static LinearLayout txtHintsummary;
     CardView delivery_layout;
     static TextView TxtSummConnectionType;
@@ -156,6 +161,16 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
 
         recyclerView = (RecyclerView) findViewById(R.id.recyclerViewSummary);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        TxtBALANCE = (TextView) findViewById(R.id.C_BALANCE);
+        TxtRISKY_CHECKS = (TextView) findViewById(R.id.C_RISKY_CHECKS);
+        TxtCREDIT_LIMIT = (TextView) findViewById(R.id.C_CREDIT_LIMIT);
+        TxtOUTSTANDING = (TextView) findViewById(R.id.C_OUTSTANDING);
+
+        TxtBALANCE.setText("BALANCE: "+  (C_BALANCE));
+        TxtRISKY_CHECKS.setText("RISKY CHECKS: "+ (C_RISKY_CHECKS));
+        TxtCREDIT_LIMIT.setText("CREDIT LIMIT: "+ (C_CREDIT_LIMIT));
+        TxtOUTSTANDING.setText("OUTSTANDING: "+ (C_OUTSTANDING));
 
         txtVNumberSummary.setText("Version " + BuildConfig.VERSION_NAME + "," + BuildConfig.VERSION_CODE); //set textview for version number
         SummaryCustomerName.setText(SelectedCustomerName);
@@ -337,7 +352,8 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
             new API_Sync_Back().productDimensions = productDimensions;
             new API_Sync_Back().Trucks = Trucks;
         }
-                SystemRecomendTruck(productDimensions, Trucks);
+                if(OpenfromPreOrderPage)
+                    SystemRecomendTruck(productDimensions, Trucks);
 
     }
 
@@ -449,18 +465,80 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
         spinnerTenderType = (Spinner) view.findViewById(R.id.spinnerTenderType);
         spinnerDeliveryMethods = (Spinner) view.findViewById(R.id.spinnerDeliveryMethods);
         LayoutWaitingPreOrderList = (LinearLayout) view.findViewById(R.id.LayoutWaitingPreOrderList);
+        LinearLayout Pre_OrderMethods = view.findViewById(R.id.Pre_OrderMethods);
         DialogFinsih.setView(view);
         dialogbtnFinsih.setEnabled(false);
         dialog = DialogFinsih.create();
         if(OpenfromStockTaken)
         {
-            spinnerDeliveryMethods.setVisibility(View.GONE);
-            spinnerTenderType.setVisibility(View.GONE);
+            Pre_OrderMethods.setVisibility(View.GONE);
         }
         dialog.show();
     }
 
-    public void btnSaveProducts(View view) {
+    public void btnSaveProducts(final View view) {
+        float limit =Float.parseFloat(C_CREDIT_LIMIT.replace(",", ""));
+        float balance =Float.parseFloat(C_BALANCE.replace(",", ""));
+        float risk =Float.parseFloat(C_RISKY_CHECKS.replace(",", ""));
+
+     double Order_Indicator =  (limit) - (balance + risk);
+        double Total_order =0.0;
+        if (OpenfromPreOrderPage) {
+            db = new ProductDBHelper(this);
+            Total_order = Calcualte_Amount(db.getAllProduct()); //preorder (product.db)
+        } else if (OpenfromOrderPage) {
+            db_order = new OrderDBHelper(this);
+            Total_order = Calcualte_Amount(db_order.getAllOrder());
+        }
+        if(Order_Indicator < Total_order)
+        {
+            AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+            alertDialog.setTitle("Order Indicator");
+            String Message = "This order may be not proceed due to user Limit Kindly check with finance";
+            Message += "\n"+"Your Total order is "+ConvertReformateNumber(String.valueOf(Total_order));
+            Message += "\n"+"Your Customer Limit is "+ConvertReformateNumber(String.valueOf(Order_Indicator));
+            alertDialog.setMessage(Message);
+                alertDialog.setIcon(this.getResources().getDrawable(R.drawable.warning));
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            btnSaveProductsAction(view);
+                        }
+                    });
+            alertDialog.show();
+        }
+        else {
+            btnSaveProductsAction(view);
+        }
+
+    }
+    private String ConvertReformateNumber(String number){
+        if(number.equals(""))
+        {
+            return "0.00";
+        }
+        else {
+            Float litersOfPetrol = Float.parseFloat(number);
+            DecimalFormat df = new DecimalFormat("0.00");
+            df.setGroupingUsed(true);
+            df.setGroupingSize(3);
+            df.setMaximumFractionDigits(2);
+            number = df.format(litersOfPetrol);
+            return number;
+        }
+    }
+
+    private  Float Calcualte_Amount(List<Product> productList)
+    {
+        float total = 0;
+        for (Product product : productList) {
+            total += Float.valueOf(product.Total);
+        }
+        return total;
+    }
+
+    public void btnSaveProductsAction(View view) {
         //List<TruckType> x =  new API_Online().Trucks.getTruckType();
         if (!new DialogHint().GPS_Dialog(this)) {
             return;
@@ -585,7 +663,7 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
             db_sync.InsertTransactionTenderOffline(Headerid, spinnerTenderType.getSelectedItem().toString(), emailpref, String.valueOf(total));
 
             for (Product product : productList) {
-                db_sync.InsertTransactionItemsOffline(Headerid, product.SKU, product.QTY, String.valueOf(product.UnitPrice), "0", emailpref, product.OnHand,product.Subinventory);
+                db_sync.InsertTransactionItemsOffline(Headerid, product.SKU, product.QTY, String.valueOf(product.UnitPrice), "0", emailpref, product.OnHand,product.Subinventory,product.getInventoryType());
             }
 
             SFA_GetTruckType trucks = new API_Sync_Back().Trucks;
@@ -793,22 +871,30 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
             }
         } else {
 
-            boolean checktenderspinner = tenderTypeSpinner.GetTenderType(spinnerTenderType, getBaseContext(),SummaryActivity.this);
-            boolean checkdeliveryspinner = deliveryMethodsSpinner.GetDeliveryMethods(spinnerDeliveryMethods, getBaseContext(),SummaryActivity.this);
+            final boolean checktenderspinner = tenderTypeSpinner.GetTenderType(spinnerTenderType, getBaseContext(),SummaryActivity.this);
+            final boolean checkdeliveryspinner = false; //deliveryMethodsSpinner.GetDeliveryMethods(spinnerDeliveryMethods, getBaseContext(),SummaryActivity.this);
 
-            if (checktenderspinner == false) {
-                try {
-                    tenderTypeSpinner.GetTenderType(spinnerTenderType, getBaseContext(),SummaryActivity.this);
-                } catch (Exception e) {
-                    tenderTypeSpinner.GetTenderType(spinnerTenderType, getBaseContext(),SummaryActivity.this);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (checktenderspinner == false) {
+                        try {
+                            tenderTypeSpinner.GetTenderType(spinnerTenderType, getBaseContext(),SummaryActivity.this);
+                        } catch (Exception e) {
+                            tenderTypeSpinner.GetTenderType(spinnerTenderType, getBaseContext(),SummaryActivity.this);
+                        }
+                    }
+                    if (checkdeliveryspinner == false) {
+                        try {
+                            deliveryMethodsSpinner.GetDeliveryMethods(spinnerDeliveryMethods, getBaseContext(),SummaryActivity.this);
+                        } catch (Exception e) {
+                            deliveryMethodsSpinner.GetDeliveryMethods(spinnerDeliveryMethods, getBaseContext(),SummaryActivity.this);
+                        }
+                    }
                 }
-            } else if (checkdeliveryspinner == false) {
-                try {
-                    deliveryMethodsSpinner.GetDeliveryMethods(spinnerDeliveryMethods, getBaseContext(),SummaryActivity.this);
-                } catch (Exception e) {
-                    deliveryMethodsSpinner.GetDeliveryMethods(spinnerDeliveryMethods, getBaseContext(),SummaryActivity.this);
-                }
-            }
+            },1500);
+
+
         }
     }
 
@@ -829,6 +915,10 @@ public class SummaryActivity extends AppCompatActivity implements SearchView.OnQ
         i.putExtra("customerNumber", SelectedCustomerNumber);
         i.putExtra("customerDueDateFrom", customerDueDateFrom);
         i.putExtra("CustomerPrice_list", CustomerPrice_list);
+        i.putExtra("CREDIT_LIMIT", C_CREDIT_LIMIT);
+        i.putExtra("BALANCE", C_BALANCE);
+        i.putExtra("OUTSTANDING", C_OUTSTANDING);
+        i.putExtra("RISKY_CHECKS", C_RISKY_CHECKS);
         i.putExtra("firstOpen", true);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         this.startActivity(i);

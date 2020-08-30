@@ -24,6 +24,7 @@ import java.util.List;
 
 import Model.List_EndUserPrice;
 import Model.Model;
+import Model.Parsing_Json.SFA_Customers;
 import Model.Parsing_Json.SFA_GetItemDimensions_All;
 import Model.Parsing_Json.SFA_GetPromotions;
 import Model.Parsing_Json.SFA_GetPromotionsXQuery;
@@ -32,6 +33,7 @@ import Model.Parsing_Json.SFA_GetTruckType;
 import Model.Parsing_Json.SFA_User_X_Subinventory;
 import Model.Promotions;
 import Model.Serial;
+import Model.Customer;
 import Utility.Http;
 import cz.msebera.android.httpclient.HttpResponse;
 import preview_database.DB.SerialDB.SerialDBHelper;
@@ -164,38 +166,39 @@ public class API_Sync_DB {
             @Override
             public void onResponse(String response) {
                 try {
-                    JSONObject jsonObject = new JSONObject(response);
-                    JSONArray array = jsonObject.getJSONArray("SFA_CustomersResult");
 
-                    for(int i=0;i<array.length();i++){
-                        JSONObject current = array.getJSONObject(i);
+                    SFA_Customers sfa_customers = new Gson().fromJson(response, SFA_Customers.class);
+                    Log.v("","");
 
+                    for (Customer c : sfa_customers.getCustomer() ) {
                         ContentValues contentValues = new ContentValues();
-                        contentValues.put("Customer_Number", current.getString("Customer_Number"));
-                        contentValues.put("Customer_Name", current.getString("Customer_Name"));
-                        contentValues.put("PRICE_LIST", current.getString("PRICE_LIST"));
-                        contentValues.put("DueDateFrom", current.getString("DueDateFrom"));
-                        contentValues.put("ScheuleID",  current.getString("ScheuleID"));
-                        contentValues.put("VisitID", current.getString("VisitID"));
+                        contentValues.put("Customer_Number", c.getNumber());
+                        contentValues.put("Customer_Name", c.getName());
+                        contentValues.put("PRICE_LIST", c.getPrice_list());
+                        contentValues.put("DueDateFrom", c.getDueDateFrom());
+                        contentValues.put("ScheuleID",  c.getScheuleID());
+                        contentValues.put("VisitID", c.getVisitID());
 
-                        contentValues.put("CUSTOMER_CLASS", current.getString("CUSTOMER_CLASS"));
-                        contentValues.put("CREATION_DATE", current.getString("CREATION_DATE"));
-                        contentValues.put("CUSTOMER_CATEGORY", current.getString("CUSTOMER_CATEGORY"));
-                        contentValues.put("PRIMARY_SALESREP_NAME", current.getString("PRIMARY_SALESREP_NAME"));
-                        contentValues.put("PAYMENT_TERM", current.getString("PAYMENT_TERM"));
-                        contentValues.put("CITY", current.getString("CITY"));
-                        contentValues.put("COUNTRY", current.getString("COUNTRY"));
-                        contentValues.put("CREDIT_LIMIT", current.getString("CREDIT_LIMIT"));
-                        contentValues.put("OVER_DRAFT", current.getString("OVER_DRAFT"));
-                        contentValues.put("REGION", current.getString("REGION"));
-                        contentValues.put("AREA", current.getString("AREA"));
+                        contentValues.put("CUSTOMER_CLASS", c.getCUSTOMER_CLASS());
+                        contentValues.put("CREATION_DATE", c.getCREATION_DATE());
+                        contentValues.put("CUSTOMER_CATEGORY", c.getCUSTOMER_CATEGORY());
+                        contentValues.put("PRIMARY_SALESREP_NAME", c.getPRIMARY_SALESREP_NAME());
+                        contentValues.put("PAYMENT_TERM", c.getPAYMENT_TERM());
+                        contentValues.put("CITY", c.getCITY());
+                        contentValues.put("COUNTRY", c.getCOUNTRY());
+                        contentValues.put("CREDIT_LIMIT", c.getCREDIT_LIMIT());
+                        contentValues.put("OVER_DRAFT", c.getOVER_DRAFT());
+                        contentValues.put("REGION", c.getREGION());
+                        contentValues.put("AREA", c.getAREA());
+                        contentValues.put("BALANCE", c.getBALANCE());
+                        contentValues.put("OUTSTANDING", c.getOUTSTANDING());
+                        contentValues.put("RISKY_CHECKS", c.getRISKY_CHECKS());
 
 
                         db_sync.InsertCustomersOffline(contentValues);
-                        if(Customernumber!=""){
-                            checkcustomer = true;
-                        }
+
                     }
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -528,10 +531,10 @@ public class API_Sync_DB {
         return checkcategory;
     }
 
-    public void SFA_User_X_Subinventory(final Context context,String Username) {
+    public void SFA_User_X_Subinventory(final Context context,String Username,String serverConfigID) {
         String url;
         db_sync = new SyncDBHelper(context);
-        url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_User_X_Subinventory/" + Username+"/1";
+        url = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_User_X_Subinventory/" + Username+"/"+serverConfigID;
         url = url.replaceAll(" ", "%20");
 
         StringRequest CategoryRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
@@ -700,11 +703,6 @@ public class API_Sync_DB {
                     e.printStackTrace();
                 }
                 checkTenderType = true;
-//                try {
-//                    ((SyncActivity)activity).changeTenderTypeImagetoTrue();
-//                }catch (Exception e){
-//                   // e.printStackTrace();
-//                }
 
             }
         }, new Response.ErrorListener() {
@@ -718,6 +716,40 @@ public class API_Sync_DB {
         Volley.newRequestQueue(context).add(TenderRequest);
         return checkTenderType;
     }
+    String InventoryTypes;
+    public boolean InventoryTypeOffline(final Activity activity, final Context context, String ServerConfigID){
+        String urlTender;
+
+        urlTender = "http://www.rayatrade.com/RayaTradeWCFService/RayaService.svc/SFA_GetInventoryTypes/"+ServerConfigID;
+        StringRequest TenderRequest = new StringRequest(Request.Method.GET, urlTender, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject object = new JSONObject(response);
+                    JSONArray array = object.getJSONArray("SFA_GetInventoryTypesResult");
+
+                    for(int i=0;i<array.length();i++){
+                        InventoryTypes = array.get(i).toString();
+                        db_sync.InsertInventoryTypesOffline(InventoryTypes);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                checkTenderType = true;
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+                checkTenderType=false;
+            }
+
+        });
+        Volley.newRequestQueue(context).add(TenderRequest);
+        return checkTenderType;
+    }
+
 
     String SalesReasonresult;
     public boolean SalesReasonOffline(final Activity activity, final Context context, String Language){

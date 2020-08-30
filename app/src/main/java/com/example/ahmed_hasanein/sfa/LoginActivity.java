@@ -211,7 +211,7 @@ public class LoginActivity extends AppCompatActivity {
         Terms_info_image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               new DialogHint().allertdialog(LoginActivity.this,"Terms and Conditions: ",terms_conditions);
+               new DialogHint().allertdialog(LoginActivity.this,"Terms and Conditions: ",terms_conditions,true);
             }
         });
 
@@ -538,6 +538,7 @@ public class LoginActivity extends AppCompatActivity {
                 db_sync.deleteAllGetStockSerialsOffline();
                 db_sync.deleteAllTransactionTypesOffline();
                 db_sync.deleteAllUser_X_Subinventory();
+                db_sync.deleteAllInventoryTypesOfflineOffline();
             }
 
             @Override
@@ -705,7 +706,7 @@ public class LoginActivity extends AppCompatActivity {
                     public void run() {
                         TransactionTypes(ServerConfigIDpref);
                     }
-                }, 5000);
+                }, 8000);
             }
 
         }.execute();
@@ -737,7 +738,7 @@ public class LoginActivity extends AppCompatActivity {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        SyncSubinventory(ServerConfigIDpref);
+                        SyncInventory(ServerConfigIDpref);
                     }
                 }, 5000);
             }
@@ -745,6 +746,40 @@ public class LoginActivity extends AppCompatActivity {
         }.execute();
     }
 //5
+public void SyncInventory(final String ServerConfigIDpref) {
+    new AsyncTask<String, Integer, String>() {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            db_sync.deleteAllInventoryTypesOfflineOffline();
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            db_sync = new SyncDBHelper(getBaseContext());
+            apiSyncDB.InventoryTypeOffline(LoginActivity.this,getBaseContext(),ServerConfigIDpref);
+            return null;
+
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            pDialog.setProgress(20);
+            pDialog.setMessage("Sync Inventory Types ...");
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    SyncSubinventory(ServerConfigIDpref);
+                }
+            }, 5000);
+        }
+
+    }.execute();
+}
+    //5
     public void SyncSubinventory(final String ServerConfigID) {
         new AsyncTask<String, Integer, String>() {
 
@@ -759,7 +794,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 db_sync = new SyncDBHelper(getBaseContext());
 
-                apiSyncDB.SFA_User_X_Subinventory(getBaseContext(),emailpref);
+                apiSyncDB.SFA_User_X_Subinventory(getBaseContext(),emailpref,ServerConfigIDpref);
 
                 return null;
 

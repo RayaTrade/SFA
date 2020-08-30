@@ -53,8 +53,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
     String customer_number;
     SharedPreferences prefs;
     boolean OfflineMode = false;
-    String Subinventory;
-    public ProductAdapter(List<Product> productList, Context context,String customer_name,String customer_number,Activity activity,boolean OfflineMode,String Subinventory) {
+    String Subinventory,InventoryType;
+
+    public ProductAdapter(List<Product> productList, Context context,String customer_name,String customer_number,Activity activity,boolean OfflineMode,String Subinventory,String InventoryType) {
         this.productList = productList;
         this.context = context;
         this.customer_name = customer_name;
@@ -62,6 +63,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
         this.activity = activity;
         this.OfflineMode = OfflineMode;
         this.Subinventory = Subinventory;
+        this.InventoryType = InventoryType;
     }
 
     @NonNull
@@ -158,7 +160,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
                                viewHolder.RowColor,
                                viewHolder.RowCustomer_number,
                                SelectedCustomerVisitDate,
-                               Subinventory
+                               Subinventory,
+                               InventoryType
                        );
                        viewHolder.EditMain_Qty.setText("");
                        closeKeyboard();
@@ -179,7 +182,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
                                     viewHolder.RowColor,
                                     viewHolder.RowCustomer_number,
                                     SelectedCustomerVisitDate,
-                                    viewHolder.subinventory.getText().toString()
+                                    viewHolder.subinventory.getText().toString(),""
                                     );
                             viewHolder.EditMain_Qty.setText("");
                             closeKeyboard();
@@ -256,7 +259,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
     }
 
     public void btnAddItem(final String Qty, final int position,
-                           String SKU,String Category,String Brand,String Model,String Description,String image,float UnitPrice,String OnHand,String Color,String Customer_number,String Visit_Date,String subinventory){
+                           String SKU,String Category,String Brand,String Model,String Description,String image,float UnitPrice,String OnHand,String Color,String Customer_number,String Visit_Date,String subinventory,String InventoryType){
 
 
         if(!Qty.isEmpty()){
@@ -274,8 +277,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
                         ,Color
                         ,Customer_number,
                         ""
-                        ,Visit_Date,"","","","",subinventory);
-                AddfromStockTaking(Qty,position);
+                        ,Visit_Date,"","","","",subinventory,InventoryType);
+                AddfromStockTaking(Qty,position,InventoryType);
             }
             else if(Integer.parseInt(Qty)>=1) {
                 mProduct = new Product(SKU,
@@ -290,7 +293,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
                         ,Color
                         ,Customer_number,
                         ""
-                        ,Visit_Date,"","","","",subinventory);
+                        ,Visit_Date,"","","","",subinventory,"");
 
                 if(OpenfromPreOrderPage == true) {
                     AddfromPreOrder(Qty, position);
@@ -425,22 +428,22 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    public void AddfromStockTaking(final String Qty , final int position){
+    public void AddfromStockTaking(final String Qty , final int position, final String InventoryType){
         final StockTakingDBHelper stockTakingDBHelper = new StockTakingDBHelper(context);
         new AsyncTask<Void, Void, Void>() {
 
             @Override
             protected Void doInBackground(Void... params) {
-                if (stockTakingDBHelper.CheckSKUOrder(mProduct.getSKU())==false) {
+                if (stockTakingDBHelper.CheckSKUOrder(mProduct.getSKU(),InventoryType)==false) {
                     itemExist= false;
                     stockTakingDBHelper.insertItemStockTaking(mProduct.getSKU(),mProduct.getCategory(),mProduct.getImage()
                             ,mProduct.getBrand(),mProduct.getModel(),mProduct.getDescription()
                             ,mProduct.getQTY(),mProduct.getCustomer_number(),mProduct.getOnHand()
-                            ,mProduct.getUnitPrice(),Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)),mProduct.Visit_Date,mProduct.getSubinventory());
+                            ,mProduct.getUnitPrice(),Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)),mProduct.Visit_Date,mProduct.getSubinventory(),InventoryType);
                 }else{
                     itemExist= true;
                     stockTakingDBHelper.updateItemOrder(mProduct.getSKU(),mProduct.getQTY(),mProduct.getOnHand()
-                            ,mProduct.getUnitPrice(),Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)));
+                            ,mProduct.getUnitPrice(),Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)),InventoryType);
                 }
                 return null;
             }

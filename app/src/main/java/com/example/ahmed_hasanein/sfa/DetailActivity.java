@@ -43,6 +43,7 @@ public class DetailActivity extends AppCompatActivity {
     boolean itemExist;
     SharedPreferences prefs;
     String subinventory;
+    String InventoryType;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +74,7 @@ public class DetailActivity extends AppCompatActivity {
         if (extras != null) {
             TxtSKU.setText(extras.getString("productSKU"));
              subinventory = extras.getString("subinventory");
+            InventoryType = extras.getString("InventoryType");
            // TxtCat.setText(extras.getString("productCat"));
             TxtBrand.setText(extras.getString("productBrand"));
             TxtModel.setText(extras.getString("productModel"));
@@ -166,14 +168,14 @@ public class DetailActivity extends AppCompatActivity {
                         , ""
                         , extras.getString("customer_number")
                         , ""
-                        , SelectedCustomerVisitDate, "", "", "", "", subinventory);
+                        , SelectedCustomerVisitDate, "", "", "", "", subinventory,InventoryType);
                 AddfromStockTaking(EditText);
             }
             else
             {
                 if (!TxtUnitPrice.getText().toString().equals("") && Qty >= 1) {
                 UnitPrice = Float.parseFloat(TxtUnitPrice.getText().toString());
-            }
+                     }
                 if (AllowNegativeQtypref.equals("True") || (Qty <= Integer.parseInt(TxtOnHandDetail.getText().toString()) && AllowNegativeQtypref.equals("False"))) {
                 if (Integer.parseInt(EditText) >= 1) {
                     mProduct = new Product(TxtSKU.getText().toString(),
@@ -188,7 +190,7 @@ public class DetailActivity extends AppCompatActivity {
                             , ""
                             , extras.getString("customer_number")
                             , ""
-                            , SelectedCustomerVisitDate, "", "", "", "", subinventory);
+                            , SelectedCustomerVisitDate, "", "", "", "", subinventory,"");
                 }
 
                 if (OpenfromOrderPage == false) {
@@ -327,16 +329,16 @@ public class DetailActivity extends AppCompatActivity {
 
             @Override
             protected Void doInBackground(Void... params) {
-                if (stockTakingDBHelper.CheckSKUOrder(mProduct.getSKU())==false) {
+                if (stockTakingDBHelper.CheckSKUOrder(mProduct.getSKU(),mProduct.getInventoryType())==false) {
                     itemExist= false;
                     stockTakingDBHelper.insertItemStockTaking(mProduct.getSKU(),mProduct.getCategory(),mProduct.getImage()
                             ,mProduct.getBrand(),mProduct.getModel(),mProduct.getDescription()
                             ,mProduct.getQTY(),mProduct.getCustomer_number(),mProduct.getOnHand()
-                            ,mProduct.getUnitPrice(),Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)),mProduct.Visit_Date,mProduct.getSubinventory());
+                            ,mProduct.getUnitPrice(),Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)),mProduct.Visit_Date,mProduct.getSubinventory(),mProduct.getInventoryType());
                 }else{
                     itemExist= true;
                     stockTakingDBHelper.updateItemOrder(mProduct.getSKU(),mProduct.getQTY(),mProduct.getOnHand()
-                            ,mProduct.getUnitPrice(),Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)));
+                            ,mProduct.getUnitPrice(),Float.toString(mProduct.UnitPrice * Float.valueOf(Qty)),mProduct.getInventoryType());
                 }
                 return null;
             }

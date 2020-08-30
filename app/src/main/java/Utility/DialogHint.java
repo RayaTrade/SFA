@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -38,7 +39,10 @@ import com.example.ahmed_hasanein.sfa.MainActivity;
 import com.example.ahmed_hasanein.sfa.R;
 import com.example.ahmed_hasanein.sfa.SplashActivity;
 
+import org.json.JSONObject;
+
 import java.io.File;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -55,7 +59,7 @@ import preview_database.DB.SyncDB.SyncDBHelper;
 import static android.content.Context.LOCATION_SERVICE;
 import static com.example.ahmed_hasanein.sfa.LoginActivity.OfflineMode;
 
-public class DialogHint {
+public class DialogHint  {
     public static String Long, Lat;
     private SyncDBHelper db_sync;
     public static String VisitDate;
@@ -130,10 +134,127 @@ public class DialogHint {
     }
 
 
-    public void Customer_Visit_Dialog(final View v, final Context context, final Activity activity, final String CountryCode, final String CustomerPrice_list, final String CustomerName, final String CustomerNumber, final String DueDateFrom, final String Submitter) {
-        final AlertDialog.Builder builder = new AlertDialog.Builder((Activity) v.getContext());
-        final AlertDialog.Builder ReasonDialog = new AlertDialog.Builder((Activity) v.getContext());
+    public void Customer_Visit_Dialog(final View v, final Context context, final Activity activity, final String CountryCode, final String CustomerPrice_list, final String CustomerName, final String CustomerNumber, final String DueDateFrom, final String Submitter, final String CREDIT_LIMIT, final String BALANCE, final String OUTSTANDING, final String RISKY_CHECKS) {
+
+        AlertDialog.Builder builderSingle = new AlertDialog.Builder(activity);
+     //   builderSingle.setMessage("Please select visit type");
+
+        builderSingle.setTitle("Please select visit type");
+
+        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1);
+        arrayAdapter.add("With Sales");
+        arrayAdapter.add("Without Sales");
+        arrayAdapter.add("Complaint");
+
+
+        builderSingle.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        builderSingle.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String strName = arrayAdapter.getItem(which);
+
+              if(strName.equals("With Sales"))
+              {
+                  dialog.dismiss();
+                  VisitDate = DueDateFrom;
+                  if(Submitter == null || User.Username == null)
+                  {
+                      new DialogHint().Session_End(activity,context);
+                  }
+                  else {
+                      Intent i = new Intent(activity, MainActivity.class);
+                      i.putExtra("customerName", CustomerName);
+                      i.putExtra("customerNumber", CustomerNumber);
+                      i.putExtra("customerDueDateFrom", DueDateFrom);
+                      i.putExtra("CustomerPrice_list", CustomerPrice_list);
+                      i.putExtra("CREDIT_LIMIT", ConvertReformateNumber(CREDIT_LIMIT));
+                      i.putExtra("BALANCE", ConvertReformateNumber(BALANCE));
+                      i.putExtra("OUTSTANDING", ConvertReformateNumber(OUTSTANDING));
+                      i.putExtra("RISKY_CHECKS", ConvertReformateNumber(RISKY_CHECKS));
+                      i.putExtra("firstOpen", true);
+                      i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                      activity.startActivity(i);
+                  }
+
+              }else if(strName.equals("Without Sales"))
+              {
+                  dialog.dismiss();
+                  if(Submitter == null || User.Username == null)
+                  {
+                      new DialogHint().Session_End(activity,context);
+                  }
+                  else {
+                      new CustomerActivity().SalesReasonPopup(context, activity, CountryCode, CustomerName, CustomerNumber, Submitter, Long, Lat, "By Raya", "3", "Online");
+                  }
+              }else if(strName.equals("Complaint"))
+              {
+                  dialog.dismiss();
+
+                  final Dialog Complaintdialog = new Dialog(activity);
+
+                  Complaintdialog.setContentView(R.layout.complaint_layout);
+                  Complaintdialog.setTitle("Complaint");
+
+                  // set the custom dialog components - text, image and button
+                  TextView Com_Customenumber = (TextView) Complaintdialog.findViewById(R.id.Com_Customenumber);
+                  Com_Customenumber.setText("Customer Number: "+CustomerNumber);
+
+                  TextView Com_Customename = (TextView) Complaintdialog.findViewById(R.id.Com_Customename);
+                  Com_Customename.setText("Customer Name: "+CustomerName);
+
+                  final EditText Com_Text = (EditText) Complaintdialog.findViewById(R.id.Com_text);
+
+                  Button SubmitButton = (Button) Complaintdialog.findViewById(R.id.Com_Submit);
+                  ImageButton CancelButton =  Complaintdialog.findViewById(R.id.Com_exit);
+                  // if button is clicked, close the custom dialog
+                  SubmitButton.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                          ProgressDialog   dialog = new ProgressDialog(activity);
+                          dialog.setMessage("Submit Complaint");
+                            dialog.show();
+                          try {
+                             JSONObject object = new JSONObject();
+                             object.accumulate("CustomerNumber", CustomerNumber);
+                             object.accumulate("CustomerName", CustomerName);
+                             object.accumulate("Submitter", Submitter);
+                             object.accumulate("Body", Com_Text.getText().toString());
+                             new API_Online().SubmitComplaint(object.toString(),dialog,activity);
+                         }catch (Exception e){
+
+                         }
+                          Complaintdialog.dismiss();
+                      }
+                  });
+                  CancelButton.setOnClickListener(new View.OnClickListener() {
+                          @Override
+                          public void onClick(View v) {
+                              Complaintdialog.dismiss();
+                          }
+                      });
+
+
+                  Complaintdialog.show();
+
+              }
+
+
+            }
+        });
+
+        final AlertDialog dialog = builderSingle.create();
+
+        dialog.show();
+      /*  final AlertDialog.Builder builder = new AlertDialog.Builder( v.getContext());
+      //  final AlertDialog.Builder ReasonDialog = new AlertDialog.Builder((Activity) v.getContext());
         builder.setMessage("Please select visit type");
+
         builder.setTitle("Visit");
 
 
@@ -177,14 +298,28 @@ public class DialogHint {
 
         final AlertDialog dialog = builder.create();
 
-        dialog.show();
-        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-        Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
-        positiveButton.setTextSize(13);
-        negativeButton.setTextSize(13);
+        dialog.show();*/
+ //       Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+ //       Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+ //       positiveButton.setTextSize(13);
+  //      negativeButton.setTextSize(13);
     }
 
-
+    private String ConvertReformateNumber(String number){
+        if(number.equals(""))
+        {
+            return "0.00";
+        }
+        else {
+            Float litersOfPetrol = Float.parseFloat(number);
+            DecimalFormat df = new DecimalFormat("0.00");
+            df.setGroupingUsed(true);
+            df.setGroupingSize(3);
+            df.setMaximumFractionDigits(2);
+            number = df.format(litersOfPetrol);
+            return number;
+        }
+    }
     public boolean GPS_Dialog(final Activity activity) {
         //check location turn on
         LocationManager lm = (LocationManager) activity.getSystemService(LOCATION_SERVICE);
@@ -329,11 +464,15 @@ public class DialogHint {
         alertDialog.show();
     }
 
-    public void allertdialog(Activity activity,String header ,String body)
+    public void allertdialog(Activity activity,String header ,String body,boolean warning)
     {
         AlertDialog alertDialog = new AlertDialog.Builder(activity).create();
         alertDialog.setTitle(header);
         alertDialog.setMessage(body);
+
+        if(warning)
+        alertDialog.setIcon(activity.getResources().getDrawable(R.drawable.warning));
+
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {

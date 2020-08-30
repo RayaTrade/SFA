@@ -34,6 +34,7 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +43,7 @@ import Adapter.ProductAdapter;
 import Adapter.ProductDealerAdapter;
 import FillSpinners.BrandSpinner;
 import FillSpinners.CategorySpinner;
+import FillSpinners.InventorySpinner;
 import FillSpinners.ModelSpinner;
 import FillSpinners.SubinventorySpinner;
 import Model.Brand;
@@ -49,6 +51,7 @@ import Model.Category;
 import Model.Model;
 import Model.Product;
 import Model.User;
+import Model.InventoryType;
 import Utility.Connectivity;
 import Utility.CountCartDrawable;
 import Utility.NetworkChangeReceiver;
@@ -75,11 +78,11 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
      * -- description: .........
      *  txtusername
      */
-    static TextView TxtConnectionType,txtusername;
+    static TextView TxtConnectionType,txtusername,TxtBALANCE,TxtRISKY_CHECKS,TxtCREDIT_LIMIT,TxtOUTSTANDING;
     ImageView btnRefresh;
     ImageView btnSearch;
     CardView btnSummary;
-    private Spinner spinnerSubinventory,spinnerCategory, spinnerBrand, spinnerModel;
+    private Spinner spinnerSubinventory,spinnerCategory, spinnerBrand, spinnerModel,SpinnerInventory;
     String url;
     List<Product> productList;
     List<Product> productListDB;
@@ -91,7 +94,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     String Category;
     List<String> categoryList;
     List<String> SubinventoryList;
-    String Brand;
+    List<String> InventoryList;
+    public static String Brand,C_CREDIT_LIMIT,C_BALANCE,C_OUTSTANDING,C_RISKY_CHECKS;
     List<String> brandList;
     String Model;
     List<String> modelList;
@@ -120,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     Button btnbuttomSheetshowDetails, btnBottomSheetSummaryMain;
     public ProgressDialog DropDownListDialogMainActivity;
     static TextView LayoutMainOffline;
-    LinearLayout LayoutWaitingMainList,Subinventory_Layout;
+    LinearLayout LayoutWaitingMainList,Subinventory_Layout,InventoryType_Layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,6 +150,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         btnSearch = (ImageView) findViewById(R.id.btnSearch);
         spinnerCategory = (Spinner) findViewById(R.id.spinnerCategory);
         spinnerSubinventory = (Spinner) findViewById(R.id.spinnerSubinventory);
+        SpinnerInventory = (Spinner) findViewById(R.id.SpinnerInventory);
         spinnerBrand = (Spinner) findViewById(R.id.spinnerBrand);
         spinnerModel = (Spinner) findViewById(R.id.spinnerModel);
         tableLayout = (TableLayout) findViewById(R.id.tableLayout);
@@ -162,8 +167,14 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         LayoutMainOffline = (TextView) this.findViewById(R.id.marque_scrolling_text_main);
         LayoutWaitingMainList = (LinearLayout) findViewById(R.id.LayoutWaitingMainList);
         Subinventory_Layout = (LinearLayout) findViewById(R.id.Subinventory_Layout);
+        InventoryType_Layout = findViewById(R.id.InventoryType_layout);
         txtVNumbermain.setText("Version " + BuildConfig.VERSION_NAME + "," + BuildConfig.VERSION_CODE); //set textview for version number
         mProgressBar.setVisibility(View.GONE);
+
+        TxtBALANCE = (TextView) findViewById(R.id.C_BALANCE);
+        TxtRISKY_CHECKS = (TextView) findViewById(R.id.C_RISKY_CHECKS);
+        TxtCREDIT_LIMIT = (TextView) findViewById(R.id.C_CREDIT_LIMIT);
+        TxtOUTSTANDING = (TextView) findViewById(R.id.C_OUTSTANDING);
         /*
          * # change date 30/7/2019
          * © changed by Ahmed Ali
@@ -201,6 +212,15 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             SelectedCustomerNumber = extras.getString("customerNumber");
             CustomerPrice_list = extras.getString("CustomerPrice_list");
             customerDueDateFrom = extras.getString("customerDueDateFrom");
+            C_CREDIT_LIMIT = ( extras.getString("CREDIT_LIMIT"));
+            C_BALANCE = (extras.getString("BALANCE"));
+            C_OUTSTANDING =  (extras.getString("OUTSTANDING"));
+            C_RISKY_CHECKS =  (extras.getString("RISKY_CHECKS"));
+
+            TxtBALANCE.setText("BALANCE: "+  (C_BALANCE));
+            TxtRISKY_CHECKS.setText("RISKY CHECKS: "+ (C_RISKY_CHECKS));
+            TxtCREDIT_LIMIT.setText("CREDIT LIMIT: "+ (C_CREDIT_LIMIT));
+            TxtOUTSTANDING.setText("OUTSTANDING: "+ (C_OUTSTANDING));
 
             txtCustomerName.setText(SelectedCustomerName);
             txtCustomerNumber.setText(SelectedCustomerNumber);
@@ -257,22 +277,26 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             TxtbuttomSheetTitle.setText("Pre-Order Details");
             cart_item_notification.setText(String.valueOf(db.getAllProduct().size()));
             Subinventory_Layout.setVisibility(View.VISIBLE);
+            InventoryType_Layout.setVisibility(View.GONE);
         }else if(OpenfromStockTaken == true){
             TxtPageType.setText("Stock Taking");
             TxtbuttomSheetTitle.setText("Stock Taking Details");
             cart_item_notification.setText(String.valueOf(db_stocktaking.getAllStockTaking().size()));
             Subinventory_Layout.setVisibility(View.GONE);
+            InventoryType_Layout.setVisibility(View.VISIBLE);
         }
         else if (OpenfromOrderPage == true) {
             TxtPageType.setText("Order");
             TxtbuttomSheetTitle.setText("Order Details");
             cart_item_notification.setText(String.valueOf(db_order.getAllOrder().size()));
             Subinventory_Layout.setVisibility(View.GONE);
+            InventoryType_Layout.setVisibility(View.GONE);
         } else if (OpenfromDealerOrder == true) {
             TxtPageType.setText("Dealer Order");
             TxtbuttomSheetTitle.setText("Dealer Details");
             cart_item_notification.setText(String.valueOf(db_dealer.getAllDealerOrder().size()));
             Subinventory_Layout.setVisibility(View.GONE);
+            InventoryType_Layout.setVisibility(View.GONE);
         }
 
 
@@ -312,10 +336,17 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             @Override
             public void onClick(View v) {
                 LayoutWaitingMainList.setVisibility(View.VISIBLE);
-                if(OpenfromPreOrderPage == true)
-                new SubinventorySpinner(getBaseContext()).GetUser_X_Subinventory(LayoutWaitingMainList,spinnerSubinventory,getBaseContext(),OfflineMode,OpenfromPreOrderPage);
-                else
-                categorySpinner.GetCategory(LayoutWaitingMainList, spinnerCategory, getBaseContext(), OfflineMode);
+               if(!OfflineMode) {
+                   if (OpenfromPreOrderPage == true)
+                       new SubinventorySpinner(getBaseContext()).GetUser_X_Subinventory(LayoutWaitingMainList, spinnerSubinventory, getBaseContext(), OfflineMode, OpenfromPreOrderPage);
+                   else if (OpenfromStockTaken)
+                       new InventorySpinner(getBaseContext()).GetInventory(SpinnerInventory, getBaseContext(), OfflineMode);
+
+                   else
+                       categorySpinner.GetCategory(LayoutWaitingMainList, spinnerCategory, getBaseContext(), OfflineMode);
+               }
+               else
+                   loadingDropDownlistsOffline();
              }
         });
 
@@ -518,17 +549,19 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         });
     }
 
+
+
     public void RenderList(List<Product> productList) {
         recyclerView.setVisibility(View.VISIBLE);
         recyclerView.setLayoutManager(new LinearLayoutManager(getBaseContext()));
         if (OpenfromPreOrderPage) {
-            adapter = new ProductAdapter(productList, getBaseContext(), txtCustomerName.getText().toString(), txtCustomerNumber.getText().toString(), MainActivity.this,OfflineMode,spinnerSubinventory.getSelectedItem().toString());
+            adapter = new ProductAdapter(productList, getBaseContext(), txtCustomerName.getText().toString(), txtCustomerNumber.getText().toString(), MainActivity.this,OfflineMode,spinnerSubinventory.getSelectedItem().toString(),"");
             recyclerView.setAdapter(adapter);
         }else if (OpenfromOrderPage) {
-            adapter = new ProductAdapter(productList, getBaseContext(), txtCustomerName.getText().toString(), txtCustomerNumber.getText().toString(), MainActivity.this,OfflineMode,"");
+            adapter = new ProductAdapter(productList, getBaseContext(), txtCustomerName.getText().toString(), txtCustomerNumber.getText().toString(), MainActivity.this,OfflineMode,"","");
             recyclerView.setAdapter(adapter);
         }else if (OpenfromStockTaken) {
-            adapter = new ProductAdapter(productList, getBaseContext(), txtCustomerName.getText().toString(), txtCustomerNumber.getText().toString(), MainActivity.this,OfflineMode,"");
+            adapter = new ProductAdapter(productList, getBaseContext(), txtCustomerName.getText().toString(), txtCustomerNumber.getText().toString(), MainActivity.this,OfflineMode,"",SpinnerInventory.getSelectedItem().toString());
             recyclerView.setAdapter(adapter);
         } else if (OpenfromDealerOrder) {
             productDealerAdapter = new ProductDealerAdapter(productList, getBaseContext(), txtCustomerName.getText().toString(), txtCustomerNumber.getText().toString(), MainActivity.this);
@@ -573,6 +606,26 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     }
 
     public void DropDownChanged() {
+        SpinnerInventory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                try{
+                    if(SpinnerInventory != null)
+                    {
+                        categorySpinner.GetCategory(LayoutWaitingMainList, spinnerCategory, getBaseContext(), OfflineMode);
+                    }
+                    recyclerView.removeAllViewsInLayout();
+                }
+                catch (Exception e)
+                {}
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         spinnerSubinventory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -581,6 +634,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                   {
                       categorySpinner.GetCategory(LayoutWaitingMainList, spinnerCategory, getBaseContext(), OfflineMode);
                   }
+                    recyclerView.removeAllViewsInLayout();
                 }
                 catch (Exception e)
                 {}
@@ -872,12 +926,17 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         brandList = new ArrayList<>();
         modelList = new ArrayList<>();
         SubinventoryList = new ArrayList<>();
+        InventoryList = new ArrayList<>();
 
         for (Subinventory c : db_sync.getUser_X_Subinventory()) {
             SubinventoryList.add(c.getSubinventory());
         }
+        for (InventoryType c : db_sync.getAllInventoryTypesOffline()) {
+            InventoryList.add(c.getName());
+        }
 
         spinnerSubinventory.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item,  SubinventoryList));
+        SpinnerInventory.setAdapter(new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_dropdown_item,  InventoryList));
 
 
         for (Category c : db_sync.getAllCategoryOffline()) {
@@ -906,6 +965,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     public void loadingDropDownlistsOnline() {
         if(OpenfromPreOrderPage == true)
             new SubinventorySpinner(getBaseContext()).GetUser_X_Subinventory(LayoutWaitingMainList,spinnerSubinventory,getBaseContext(),OfflineMode,OpenfromPreOrderPage);
+        else if(OpenfromStockTaken)
+            new InventorySpinner(getBaseContext()).GetInventory(SpinnerInventory,getBaseContext(),OfflineMode);
         else
             categorySpinner.GetCategory(LayoutWaitingMainList, spinnerCategory, getBaseContext(), OfflineMode);
     }
